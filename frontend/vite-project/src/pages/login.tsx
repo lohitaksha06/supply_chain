@@ -1,38 +1,75 @@
 import React from 'react';
+import "./login.css";
 
 const Login = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm">
-        <h2 className="text-2xl font-bold text-center mb-6 text-blue-700">Company Login</h2>
-        <form className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="company@example.com"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input
-              type="password"
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl transition duration-300"
-          >
-            Log In
-          </button>
-        </form>
+    <div className="login-container">
+      <div className="login-left-panel">
+        <div className="login-branding">
+          {/* Removed img tag - you can add text-only logo */}
+          <h1>Pharma<span>Chain</span></h1>
+          <p>Secure access to medecine records and track your medecine location</p>
+        </div>
+        <div className="login-illustration">
+          {/* Empty container - can remove or keep for future use */}
+        </div>
+      </div>
+      
+      <div className="login-form-container">
+        <div className="login-form-wrapper">
+          <h2>Welcome Back</h2>
+          <p className="login-subtitle">Sign in to your account</p>
+          
+          <form className="login-form">
+            <div className="form-group">
+              <label htmlFor="email">Email Address</label>
+              <input
+                type="email"
+                id="email"
+                placeholder="doctor@medicalcenter.com"
+                className="form-input"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                placeholder="Enter your password"
+                className="form-input"
+              />
+              <div className="forgot-password">
+                <a href="#">Forgot password?</a>
+              </div>
+            </div>
+            
+            <button type="submit" className="login-button">
+              Sign In
+            </button>
+            
+            <div className="login-divider">
+              <span>or</span>
+            </div>
+            
+            <button type="button" className="sso-button">
+              Sign in with Hospital ID
+            </button>
+          </form>
+          
+          <p className="login-footer">
+            Don't have an account? <a href="#">Request access</a>
+          </p>
+        </div>
+        
+        <div className="login-footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Use</a>
+          <a href="#">Help Center</a>
+        </div>
       </div>
     </div>
   );
 };
 
 export default Login;
-

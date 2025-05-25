@@ -1,9 +1,6 @@
 {
-  "name": "vite-project",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
+  "scripts": {  
+    "start": "npm run dev",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
