@@ -53,7 +53,7 @@ const Login = () => {
             </div>
             
             <button type="button" className="sso-button">
-              Sign in with Hospital ID
+              Sign in with Google
             </button>
           </form>
           

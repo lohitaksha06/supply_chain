@@ -68,7 +68,7 @@
   margin-top: 2rem;
 }
 
-/* Right panel with form */
+/* Right panel with form - ONLY CHANGED THIS SECTION */
 .login-form-container {
   flex: 1;
   background-color: var(--light-gray);
@@ -79,7 +79,7 @@
 }
 
 .login-form-wrapper {
-  max-width: 400px;
+  max-width: 700px; /* Changed from 400px to 450px */
   margin: 0 auto;
   width: 100%;
 }

@@ -4,11 +4,13 @@ import Home from './pages/home';
 import CompanyForm from './components/companyform';
 import BatchTracker from './components/batchtracker';
 import Login from './pages/login';
+import Signup from './pages/signup'; 
 
 function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/signup" element={<Signup />} /> 
         {/* Make login the default route */}
         <Route path="/" element={<Login />} />
         
