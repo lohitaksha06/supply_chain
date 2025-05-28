@@ -25,3 +25,22 @@ pub async fn get_db_pool() -> Result<SqlitePool, sqlx::Error> {
 
     Ok(pool)
 }
+pub async fn add_user(
+    pool: &SqlitePool,
+    username: &str,
+    email: &str,
+    password: &str,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "INSERT INTO users (id, username, email, password) VALUES (?, ?, ?, ?)",
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind(username)
+    .bind(email)
+    .bind(password)
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
