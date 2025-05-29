@@ -1,25 +1,24 @@
 use axum::{Json, extract::State};
-use uuid::Uuid;
-use sqlx::sqlite::SqlitePool;
+use sqlx::SqlitePool;
+use std::sync::Arc;
 use crate::models::{SignupData, ApiResponse};
-use crate::db::get_db_pool;
+use crate::db::add_user;
 
 pub async fn signup(
+    State(pool): State<Arc<SqlitePool>>,
     Json(payload): Json<SignupData>,
 ) -> Json<ApiResponse> {
-    let pool = get_db_pool().await.unwrap();
-    let id = Uuid::new_v4().to_string();
+    let result = add_user(&pool, &payload.username, &payload.email, &payload.password).await;
 
-    let res = sqlx::query("INSERT INTO users (id, username, email, password) VALUES (?, ?, ?, ?)")
-        .bind(&id)
-        .bind(&payload.username)
-        .bind(&payload.email)
-        .bind(&payload.password) // Consider hashing it later!
-        .execute(&pool)
-        .await;
-
-    match res {
-        Ok(_) => Json(ApiResponse { message: "User registered".into() }),
-        Err(_) => Json(ApiResponse { message: "Error registering user".into() }),
+    match result {
+        Ok(_) => Json(ApiResponse {
+            message: "User signed up successfully".to_string(),
+        }),
+        Err(e) => {
+            eprintln!("Signup error: {}", e);
+            Json(ApiResponse {
+                message: "Signup failed".to_string(),
+            })
+        }
     }
 }

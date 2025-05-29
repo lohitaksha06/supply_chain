@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './signup.css'; // Reuse your login.css or create new
+import './signup.css';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -20,7 +20,7 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     try {
       const response = await fetch('http://localhost:3001/api/signup', {
         method: 'POST',
@@ -33,7 +33,14 @@ const Signup = () => {
         throw new Error(errorData.message || 'Signup failed');
       }
 
-      navigate('/login'); // Redirect to login after successful signup
+      const data = await response.json();
+
+      // Save token and user info in localStorage for persistent login
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // Redirect to home page after successful signup
+      navigate('/home');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
     }
@@ -43,22 +50,25 @@ const Signup = () => {
     <div className="login-container">
       <div className="login-form-container">
         <div className="login-form-wrapper">
-          <h2>Create Company Account</h2>
+          <h2>Create Account</h2>
           <p className="login-subtitle">Track your medicine supply chain</p>
-          
+
           {error && <div className="error-message">{error}</div>}
 
           <form className="login-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Company Name</label>
-              <input
-                type="text"
-                name="companyName"
-                value={formData.companyName}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            {/* Conditionally show company name only if role is company */}
+            {formData.role === 'company' && (
+              <div className="form-group">
+                <label>Company Name</label>
+                <input
+                  type="text"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  required={formData.role === 'company'}
+                />
+              </div>
+            )}
 
             <div className="form-group">
               <label>Email</label>
@@ -90,9 +100,9 @@ const Signup = () => {
                 value={formData.role}
                 onChange={handleChange}
               >
-                <option value="company">Medicine Supplier</option>
+                <option value="company">Company</option>
                 <option value="hospital">Hospital</option>
-                <option value="pharmacy">Pharmacy</option>
+                <option value="patient">Patient</option>
               </select>
             </div>
 
@@ -111,3 +121,4 @@ const Signup = () => {
 };
 
 export default Signup;
+
