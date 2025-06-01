@@ -10,7 +10,8 @@ pub async fn init_db() -> Result<(), sqlx::Error> {
             id TEXT PRIMARY KEY,
             username TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
-            password TEXT NOT NULL
+            password TEXT NOT NULL,
+            role TEXT NOT NULL
         )"
     )
     .execute(&pool)
@@ -35,14 +36,16 @@ pub async fn add_user(
     username: &str,
     email: &str,
     password: &str,
+    role: &str, // 👈 Add this
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
-        "INSERT INTO users (id, username, email, password) VALUES (?, ?, ?, ?)",
+        "INSERT INTO users (id, username, email, password, role) VALUES (?, ?, ?, ?, ?)",
     )
     .bind(uuid::Uuid::new_v4().to_string())
     .bind(username)
     .bind(email)
     .bind(password)
+    .bind(role) // 👈 Add this
     .execute(pool)
     .await?;
 
@@ -55,7 +58,7 @@ pub async fn find_user_by_email(
     email: &str,
 ) -> Result<Option<User>, sqlx::Error> {
     let user = sqlx::query_as::<_, User>(
-        "SELECT id, username, email, password FROM users WHERE email = ?",
+        "SELECT id, username, email, password, role FROM users WHERE email = ?", // 👈 Add `role`
     )
     .bind(email)
     .fetch_optional(pool)
@@ -63,4 +66,3 @@ pub async fn find_user_by_email(
 
     Ok(user)
 }
-

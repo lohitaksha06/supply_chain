@@ -38,9 +38,14 @@ const Signup = () => {
       // Save token and user info in localStorage for persistent login
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('role', data.role); // store the role for routing later
 
-      // Redirect to home page after successful signup
-      navigate('/home');
+      // Redirect based on role
+      if (data.role === 'company') navigate('/dashboard/company');
+      else if (data.role === 'hospital') navigate('/dashboard/hospital');
+      else if (data.role === 'patient') navigate('/dashboard/customer');
+      else navigate('/home'); // fallback
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
     }
@@ -65,7 +70,7 @@ const Signup = () => {
                   name="companyName"
                   value={formData.companyName}
                   onChange={handleChange}
-                  required={formData.role === 'company'}
+                  required
                 />
               </div>
             )}
@@ -99,7 +104,9 @@ const Signup = () => {
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
+                required
               >
+                <option value="">Select Role</option>
                 <option value="company">Company</option>
                 <option value="hospital">Hospital</option>
                 <option value="patient">Patient</option>
@@ -121,4 +128,3 @@ const Signup = () => {
 };
 
 export default Signup;
-
