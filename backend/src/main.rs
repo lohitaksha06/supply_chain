@@ -17,8 +17,10 @@ async fn main() {
 
     // Set up routes and inject state
     let app = Router::new()
-        .route("/signup", post(routes::signup))
-        .with_state(pool.clone()); // Add shared DB pool as state
+        .route("/signup", post(signup))
+        .route("/login", post(login))
+        .with_state(pool);
+
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
     println!("🚀 Server running at http://{}", addr);
