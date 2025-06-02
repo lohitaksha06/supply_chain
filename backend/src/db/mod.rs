@@ -1,10 +1,15 @@
-use sqlx::{SqlitePool, sqlite::SqlitePoolOptions};
-use crate::models::User;
+pub mod entities;
 
-/// Initializes the database by creating the `users` table if it doesn't exist.
+use sqlx::{sqlite::SqlitePoolOptions, SqlitePool};
+use std::env;
+
+use crate::db::entities::User;
+
+/// Initializes the database by creating necessary tables.
 pub async fn init_db() -> Result<(), sqlx::Error> {
     let pool = get_db_pool().await?;
 
+    // Create users table
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
@@ -12,17 +17,20 @@ pub async fn init_db() -> Result<(), sqlx::Error> {
             email TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL,
             role TEXT NOT NULL
-        )"
+        )",
     )
     .execute(&pool)
     .await?;
+
+    // ⬇️ Add similar CREATE TABLE statements for your other entities if needed
+    // (companies, customers, hospitals, trackers...)
 
     Ok(())
 }
 
 /// Returns a connection pool to the SQLite database.
 pub async fn get_db_pool() -> Result<SqlitePool, sqlx::Error> {
-    let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let pool = SqlitePoolOptions::new()
         .connect(&db_url)
         .await?;
@@ -36,7 +44,7 @@ pub async fn add_user(
     username: &str,
     email: &str,
     password: &str,
-    role: &str, // 👈 Add this
+    role: &str,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         "INSERT INTO users (id, username, email, password, role) VALUES (?, ?, ?, ?, ?)",
@@ -45,7 +53,7 @@ pub async fn add_user(
     .bind(username)
     .bind(email)
     .bind(password)
-    .bind(role) // 👈 Add this
+    .bind(role)
     .execute(pool)
     .await?;
 
@@ -58,7 +66,7 @@ pub async fn find_user_by_email(
     email: &str,
 ) -> Result<Option<User>, sqlx::Error> {
     let user = sqlx::query_as::<_, User>(
-        "SELECT id, username, email, password, role FROM users WHERE email = ?", // 👈 Add `role`
+        "SELECT id, username, email, password, role FROM users WHERE email = ?",
     )
     .bind(email)
     .fetch_optional(pool)

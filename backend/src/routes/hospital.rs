@@ -7,6 +7,8 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use std::sync::Arc;
+use crate::db::entities::add_hospital;
+
 
 #[derive(Deserialize)]
 pub struct HospitalSignup {
