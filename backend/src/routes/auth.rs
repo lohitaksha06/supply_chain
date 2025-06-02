@@ -15,7 +15,7 @@ pub fn create_routes(pool: Arc<SqlitePool>) -> Router {
         .with_state(pool)
 }
 
-pub async fn signup(
+async fn signup(
     State(pool): State<Arc<SqlitePool>>,
     Json(payload): Json<SignupData>,
 ) -> Json<ApiResponse> {
@@ -34,7 +34,7 @@ pub async fn signup(
     }
 }
 
-pub async fn login(
+async fn login(
     State(pool): State<Arc<SqlitePool>>,
     Json(payload): Json<LoginData>,
 ) -> Json<LoginResponse> {
@@ -42,7 +42,7 @@ pub async fn login(
         Ok(Some(user)) => {
             if user.password == payload.password {
                 Json(LoginResponse {
-                    token: "mock-token-123".to_string(), // TODO: Replace with JWT
+                    token: "mock-token-123".to_string(),
                     user: user.username,
                 })
             } else {
