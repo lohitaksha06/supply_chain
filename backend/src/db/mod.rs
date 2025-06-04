@@ -4,7 +4,9 @@ use sqlx::{sqlite::SqlitePoolOptions, SqlitePool};
 use std::env;
 
 use crate::db::entities::User;
+use crate::db::entities::create_tables;
 
+/// Initializes the database by creating necessary tables.
 /// Initializes the database by creating necessary tables.
 pub async fn init_db() -> Result<(), sqlx::Error> {
     let pool = get_db_pool().await?;
@@ -22,11 +24,12 @@ pub async fn init_db() -> Result<(), sqlx::Error> {
     .execute(&pool)
     .await?;
 
-    // ⬇️ Add similar CREATE TABLE statements for your other entities if needed
-    // (companies, customers, hospitals, trackers...)
+    // 🔥 Add this line to create other tables (companies, hospitals, customers)
+    create_tables(&pool).await?;
 
     Ok(())
 }
+
 
 /// Returns a connection pool to the SQLite database.
 pub async fn get_db_pool() -> Result<SqlitePool, sqlx::Error> {

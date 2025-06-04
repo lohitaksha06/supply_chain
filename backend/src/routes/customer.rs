@@ -8,7 +8,6 @@ use sqlx::SqlitePool;
 use std::sync::Arc;
 use crate::db::entities::add_customer;
 
-
 #[derive(Deserialize)]
 pub struct CustomerSignup {
     pub name: String,
@@ -28,17 +27,21 @@ async fn customer_dashboard() -> String {
 
 // POST /api/customer/signup
 async fn signup_customer(
-    State(_pool): State<Arc<SqlitePool>>,
+    State(pool): State<Arc<SqlitePool>>,
     Json(data): Json<CustomerSignup>,
-) -> Json<CustomerResponse> {
-    println!(
-        "Received signup from customer {} at {} with reg ID {}",
-        data.name, data.location, data.registration_id
-    );
+) -> Result<Json<CustomerResponse>, (axum::http::StatusCode, String)> {
+    if let Err(err) = add_customer(
+        &pool,
+        &data.name,
+        &data.location,
+        &data.registration_id,
+    ).await {
+        return Err((axum::http::StatusCode::INTERNAL_SERVER_ERROR, err.to_string()));
+    }
 
-    Json(CustomerResponse {
+    Ok(Json(CustomerResponse {
         message: "Customer registered successfully".to_string(),
-    })
+    }))
 }
 
 pub fn customer_routes(pool: Arc<SqlitePool>) -> Router {

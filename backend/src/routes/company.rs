@@ -27,25 +27,29 @@ async fn company_dashboard() -> String {
     "Welcome to the Company Dashboard!".to_string()
 }
 
-// POST /api/company/signup
-async fn signup_company(
-    State(pool): State<Arc<SqlitePool>>,
-    Json(data): Json<CompanySignup>,
-) -> Json<CompanyResponse> {
-    // TODO: Insert into DB
-    println!(
-        "Received signup from {} at {} with license {}",
-        data.name, data.location, data.license_id
-    );
-
-    Json(CompanyResponse {
-        message: "Company registered successfully".to_string(),
-    })
-}
 
 pub fn company_routes(pool: Arc<SqlitePool>) -> Router {
     Router::new()
         .route("/api/company/dashboard", get(company_dashboard))
         .route("/api/company/signup", post(signup_company))
         .with_state(pool)
+}
+async fn signup_company(
+    State(pool): State<Arc<SqlitePool>>,
+    Json(data): Json<CompanySignup>,
+) -> Result<Json<CompanyResponse>, (axum::http::StatusCode, String)> {
+    // Insert the company into the database
+    if let Err(err) = add_company(
+        &pool,
+        &data.name,
+        &data.location,
+        &data.license_id,
+        &data.stock_needed,
+    ).await {
+        return Err((axum::http::StatusCode::INTERNAL_SERVER_ERROR, err.to_string()));
+    }
+
+    Ok(Json(CompanyResponse {
+        message: "Company registered successfully".to_string(),
+    }))
 }

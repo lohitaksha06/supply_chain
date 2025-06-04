@@ -1,9 +1,8 @@
 pub mod company;
 pub mod customer;
 pub mod hospital;
-pub mod tracker; // ✅ Add tracker module
+pub mod tracker;
 pub mod entities;
-
 
 use axum::Router;
 use std::sync::Arc;
@@ -16,5 +15,4 @@ pub fn create_routes(pool: Arc<SqlitePool>) -> Router {
         .merge(hospital::hospital_routes(pool.clone()))
         .merge(tracker::tracker_routes(pool.clone())) // ✅ Add tracker routes
 }
-
 

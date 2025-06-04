@@ -1,4 +1,3 @@
-// src/routes/hospital.rs
 use axum::{
     extract::{Json, State},
     routing::{get, post},
@@ -8,7 +7,6 @@ use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use std::sync::Arc;
 use crate::db::entities::add_hospital;
-
 
 #[derive(Deserialize)]
 pub struct HospitalSignup {
@@ -29,17 +27,21 @@ async fn hospital_dashboard() -> String {
 
 // POST /api/hospital/signup
 async fn signup_hospital(
-    State(_pool): State<Arc<SqlitePool>>,
+    State(pool): State<Arc<SqlitePool>>,
     Json(data): Json<HospitalSignup>,
-) -> Json<HospitalResponse> {
-    println!(
-        "Received signup from hospital {} at {} with reg ID {}",
-        data.name, data.location, data.registration_id
-    );
+) -> Result<Json<HospitalResponse>, (axum::http::StatusCode, String)> {
+    if let Err(err) = add_hospital(
+        &pool,
+        &data.name,
+        &data.location,
+        &data.registration_id,
+    ).await {
+        return Err((axum::http::StatusCode::INTERNAL_SERVER_ERROR, err.to_string()));
+    }
 
-    Json(HospitalResponse {
+    Ok(Json(HospitalResponse {
         message: "Hospital registered successfully".to_string(),
-    })
+    }))
 }
 
 pub fn hospital_routes(pool: Arc<SqlitePool>) -> Router {
