@@ -1,5 +1,7 @@
 use sqlx::SqlitePool;
 use uuid::Uuid;
+use chrono::Utc;
+use sha2::{Sha256, Digest};
 
 #[derive(sqlx::FromRow, Debug)]
 pub struct Company {
@@ -24,6 +26,31 @@ pub struct Customer {
     pub name: String,
     pub location: String,
     pub registration_id: String,
+}
+
+#[derive(sqlx::FromRow, Debug)]
+pub struct MedicineBatch {
+    pub id: i64,
+    pub batch_id: String,
+    pub medicine_name: String,
+    pub source: String,
+    pub destination: String,
+    pub timestamp: String,
+    pub hash: String,
+}
+
+/// Reusable hash computation for blockchain-style verification.
+pub fn compute_batch_hash(
+    batch_id: &str,
+    medicine_name: &str,
+    source: &str,
+    destination: &str,
+    timestamp: &str,
+) -> String {
+    let data = format!("{batch_id}|{medicine_name}|{source}|{destination}|{timestamp}");
+    let mut hasher = Sha256::new();
+    hasher.update(data.as_bytes());
+    format!("{:x}", hasher.finalize())
 }
 
 /// Creates all required tables.
@@ -57,6 +84,20 @@ pub async fn create_tables(pool: &SqlitePool) -> Result<(), sqlx::Error> {
             name TEXT NOT NULL,
             location TEXT NOT NULL,
             registration_id TEXT NOT NULL
+        )",
+    )
+    .execute(pool)
+    .await?;
+
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS medicine_batches (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            batch_id TEXT NOT NULL UNIQUE,
+            medicine_name TEXT NOT NULL,
+            source TEXT NOT NULL,
+            destination TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            hash TEXT NOT NULL
         )",
     )
     .execute(pool)
@@ -126,52 +167,28 @@ pub async fn add_customer(
 
     Ok(())
 }
-pub async fn create_tables(pool: &SqlitePool) -> Result<(), sqlx::Error> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS companies (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            location TEXT NOT NULL,
-            license_id TEXT NOT NULL,
-            stock_needed TEXT NOT NULL
-        )",
-    )
-    .execute(pool)
-    .await?;
+
+/// Adds a medicine batch with computed blockchain-style hash.
+pub async fn add_batch_with_hash(
+    pool: &SqlitePool,
+    batch_id: &str,
+    medicine_name: &str,
+    source: &str,
+    destination: &str,
+) -> Result<(), sqlx::Error> {
+    let timestamp = Utc::now().to_rfc3339();
+    let hash = compute_batch_hash(batch_id, medicine_name, source, destination, &timestamp);
 
     sqlx::query(
-        "CREATE TABLE IF NOT EXISTS hospitals (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            location TEXT NOT NULL,
-            registration_id TEXT NOT NULL
-        )",
+        "INSERT INTO medicine_batches (batch_id, medicine_name, source, destination, timestamp, hash)
+         VALUES (?, ?, ?, ?, ?, ?)",
     )
-    .execute(pool)
-    .await?;
-
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS customers (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            location TEXT NOT NULL,
-            registration_id TEXT NOT NULL
-        )",
-    )
-    .execute(pool)
-    .await?;
-
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS medicine_batches (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            batch_id TEXT NOT NULL UNIQUE,
-            medicine_name TEXT NOT NULL,
-            source TEXT NOT NULL,
-            destination TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
-            hash TEXT NOT NULL
-        )",
-    )
+    .bind(batch_id)
+    .bind(medicine_name)
+    .bind(source)
+    .bind(destination)
+    .bind(timestamp)
+    .bind(hash)
     .execute(pool)
     .await?;
 
