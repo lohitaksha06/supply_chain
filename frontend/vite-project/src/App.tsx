@@ -1,27 +1,31 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
 import Home from './pages/home';
-import CompanyForm from './components/companyform';
-import BatchTracker from './components/batchtracker';
 import Login from './pages/login';
-import Signup from './pages/signup'; 
+import Signup from './pages/signup';
+
+import CompanyForm from './components/companyform';
+import BatchTable from './components/batchable';
+import TrackerInput from './components/trackerinput';
+import CustomerForm from './components/customer';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/signup" element={<Signup />} /> 
-        {/* Make login the default route */}
+        {/* Auth */}
         <Route path="/" element={<Login />} />
-        
-        {/* Redirect old root path to login for better UX */}
+        <Route path="/signup" element={<Signup />} />
+
+        {/* Main pages */}
         <Route path="/home" element={<Home />} />
-        
-        {/* Keep all your existing routes */}
         <Route path="/register" element={<CompanyForm />} />
-        <Route path="/track" element={<BatchTracker />} />
-        
-        {/* Optional: Add redirect for any unknown routes */}
+        <Route path="/track" element={<TrackerInput />} />
+        <Route path="/batches" element={<BatchTable />} />
+        <Route path="/customer" element={<CustomerForm />} />
+
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

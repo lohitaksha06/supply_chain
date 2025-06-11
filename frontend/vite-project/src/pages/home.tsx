@@ -1,27 +1,35 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import "./home.css";
+import { useNavigate } from 'react-router-dom';
+import './home.css';
 
 const Home = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-white to-blue-100 p-8">
-      <h1 className="text-4xl md:text-5xl font-bold text-blue-800 mb-6">
-        PharmaChain: Secure Medicine Supply Tracker
-      </h1>
-      <p className="text-gray-700 text-center max-w-xl mb-10">
-        Ensuring transparency and traceability in the pharmaceutical supply chain using blockchain technology.
-      </p>
-      <div className="flex flex-col md:flex-row gap-4">
-        <Link to="/tracker">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-xl shadow-md">
-            Track Medicine
-          </button>
-        </Link>
-        <Link to="/company">
-          <button className="bg-white hover:bg-gray-100 text-blue-600 border border-blue-600 font-semibold py-2 px-6 rounded-xl shadow-md">
-            Company Portal
-          </button>
-        </Link>
+    <div className="dashboard">
+      <h1 className="title">Welcome to PharmaChain</h1>
+      <p className="subtitle">Blockchain-powered pharmaceutical supply tracker</p>
+
+      <div className="cards">
+        <div className="card" onClick={() => navigate('/company')}>
+          <h3>Register Company</h3>
+          <p>Sign up a verified pharmaceutical company</p>
+        </div>
+
+        <div className="card" onClick={() => navigate('/tracker')}>
+          <h3>Track Medicine</h3>
+          <p>Enter a batch ID to trace medicine journey</p>
+        </div>
+
+        <div className="card" onClick={() => navigate('/batches')}>
+          <h3>All Batches</h3>
+          <p>View all recorded medicine batches</p>
+        </div>
+
+        <div className="card" onClick={() => navigate('/customer')}>
+          <h3>Customer Request</h3>
+          <p>Let customers submit stock or location requests</p>
+        </div>
       </div>
     </div>
   );
