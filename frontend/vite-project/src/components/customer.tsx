@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 
-function CompanyForm() {
+function CustomerForm() {
   const [name, setName] = useState("");
-  const [location, setLocation] = useState("");
-  const [licenseId, setLicenseId] = useState("");
-  const [stockNeeded, setStockNeeded] = useState("");
+  const [address, setAddress] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [medicine, setMedicine] = useState("");
+  const [quantity, setQuantity] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -14,29 +15,30 @@ function CompanyForm() {
     setMessage("");
 
     try {
-      const response = await fetch("http://localhost:3000/api/companies/add", {
+      const response = await fetch("http://localhost:3000/api/customers/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name,
-          location,
-          license_id: licenseId,
-          stock_needed: stockNeeded,
+          address,
+          mobile,
+          medicine,
+          quantity,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to register company");
+        throw new Error("Failed to submit request");
       }
 
-      setMessage("✅ Company registered successfully!");
-      // Reset form
+      setMessage("✅ Request submitted successfully!");
       setName("");
-      setLocation("");
-      setLicenseId("");
-      setStockNeeded("");
+      setAddress("");
+      setMobile("");
+      setMedicine("");
+      setQuantity("");
     } catch (error) {
       console.error(error);
       setMessage("❌ Something went wrong. Try again.");
@@ -47,11 +49,11 @@ function CompanyForm() {
 
   return (
     <div style={{ marginBottom: "2rem" }}>
-      <h2>Register Company</h2>
+      <h2>Customer Request</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Company Name"
+          placeholder="Full Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -59,30 +61,38 @@ function CompanyForm() {
 
         <input
           type="text"
-          placeholder="Location"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
+          placeholder="Address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
           required
         /><br /><br />
 
         <input
           type="text"
-          placeholder="License ID"
-          value={licenseId}
-          onChange={(e) => setLicenseId(e.target.value)}
+          placeholder="Mobile Number"
+          value={mobile}
+          onChange={(e) => setMobile(e.target.value)}
+          required
+        /><br /><br />
+
+        <input
+          type="text"
+          placeholder="Medicine Name"
+          value={medicine}
+          onChange={(e) => setMedicine(e.target.value)}
           required
         /><br /><br />
 
         <input
           type="number"
-          placeholder="Stock Needed"
-          value={stockNeeded}
-          onChange={(e) => setStockNeeded(e.target.value)}
+          placeholder="Quantity"
+          value={quantity}
+          onChange={(e) => setQuantity(e.target.value)}
           required
         /><br /><br />
 
         <button type="submit" disabled={loading}>
-          {loading ? "Registering..." : "Register Company"}
+          {loading ? "Submitting..." : "Submit Request"}
         </button>
       </form>
 
@@ -91,5 +101,4 @@ function CompanyForm() {
   );
 }
 
-export default CompanyForm;
-
+export default CustomerForm;
