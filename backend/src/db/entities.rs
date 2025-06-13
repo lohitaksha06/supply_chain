@@ -2,6 +2,8 @@ use sqlx::SqlitePool;
 use uuid::Uuid;
 use chrono::Utc;
 use sha2::{Sha256, Digest};
+use rsa::{RsaPrivateKey, RsaPublicKey};
+use crate::signature::{generate_keys, sign_data};
 
 #[derive(sqlx::FromRow, Debug)]
 pub struct Company {
@@ -38,6 +40,8 @@ pub struct MedicineBatch {
     pub timestamp: String,
     pub hash: String,
     pub previous_hash: String,
+    pub signature: Option<String>,
+    pub public_key: Option<String>,
 }
 
 #[derive(sqlx::FromRow, Debug)]
@@ -65,7 +69,7 @@ pub fn compute_batch_hash(
     format!("{:x}", hasher.finalize())
 }
 
-/// Creates all required tables (including on-chain proof).
+/// Creates all required tables.
 pub async fn create_tables(pool: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS companies (
@@ -74,7 +78,7 @@ pub async fn create_tables(pool: &SqlitePool) -> Result<(), sqlx::Error> {
             location TEXT NOT NULL,
             license_id TEXT NOT NULL,
             stock_needed TEXT NOT NULL
-        )",
+        )"
     )
     .execute(pool)
     .await?;
@@ -85,7 +89,7 @@ pub async fn create_tables(pool: &SqlitePool) -> Result<(), sqlx::Error> {
             name TEXT NOT NULL,
             location TEXT NOT NULL,
             registration_id TEXT NOT NULL
-        )",
+        )"
     )
     .execute(pool)
     .await?;
@@ -96,7 +100,7 @@ pub async fn create_tables(pool: &SqlitePool) -> Result<(), sqlx::Error> {
             name TEXT NOT NULL,
             location TEXT NOT NULL,
             registration_id TEXT NOT NULL
-        )",
+        )"
     )
     .execute(pool)
     .await?;
@@ -110,8 +114,10 @@ pub async fn create_tables(pool: &SqlitePool) -> Result<(), sqlx::Error> {
             destination TEXT NOT NULL,
             timestamp TEXT NOT NULL,
             hash TEXT NOT NULL,
-            previous_hash TEXT NOT NULL
-        )",
+            previous_hash TEXT NOT NULL,
+            signature TEXT NOT NULL,
+            public_key TEXT NOT NULL
+        )"
     )
     .execute(pool)
     .await?;
@@ -122,7 +128,7 @@ pub async fn create_tables(pool: &SqlitePool) -> Result<(), sqlx::Error> {
             batch_hash TEXT NOT NULL,
             merkle_root TEXT NOT NULL,
             timestamp TEXT NOT NULL
-        )",
+        )"
     )
     .execute(pool)
     .await?;
@@ -140,7 +146,7 @@ pub async fn add_company(
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         "INSERT INTO companies (id, name, location, license_id, stock_needed)
-         VALUES (?, ?, ?, ?, ?)",
+         VALUES (?, ?, ?, ?, ?)"
     )
     .bind(Uuid::new_v4().to_string())
     .bind(name)
@@ -162,7 +168,7 @@ pub async fn add_hospital(
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         "INSERT INTO hospitals (id, name, location, registration_id)
-         VALUES (?, ?, ?, ?)",
+         VALUES (?, ?, ?, ?)"
     )
     .bind(Uuid::new_v4().to_string())
     .bind(name)
@@ -183,7 +189,7 @@ pub async fn add_customer(
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         "INSERT INTO customers (id, name, location, registration_id)
-         VALUES (?, ?, ?, ?)",
+         VALUES (?, ?, ?, ?)"
     )
     .bind(Uuid::new_v4().to_string())
     .bind(name)
@@ -195,7 +201,7 @@ pub async fn add_customer(
     Ok(())
 }
 
-/// Adds a medicine batch with hash chaining + Merkle root and stores proof on-chain.
+/// Adds a medicine batch with hash chaining, Merkle root, signature, and public key.
 pub async fn add_batch_with_hash(
     pool: &SqlitePool,
     batch_id: &str,
@@ -207,14 +213,14 @@ pub async fn add_batch_with_hash(
     let timestamp = Utc::now().to_rfc3339();
 
     let previous_hash: Option<String> = sqlx::query_scalar(
-        "SELECT hash FROM medicine_batches ORDER BY timestamp DESC LIMIT 1",
+        "SELECT hash FROM medicine_batches ORDER BY timestamp DESC LIMIT 1"
     )
     .fetch_optional(pool)
     .await?;
 
     let previous_hash = previous_hash.unwrap_or_else(|| "GENESIS".to_string());
 
-    let hash = compute_batch_hash(
+    let batch_hash = compute_batch_hash(
         batch_id,
         medicine_name,
         source,
@@ -223,26 +229,34 @@ pub async fn add_batch_with_hash(
         &previous_hash,
     );
 
+    let (private_key, public_key) = generate_keys();
+    let signature_bytes = sign_data(&private_key, batch_hash.as_bytes());
+    let signature_base64 = base64::encode(&signature_bytes);
+    let public_key_pem = base64::encode(public_key.to_pkcs1_der().unwrap());
+
     sqlx::query(
-        "INSERT INTO medicine_batches (batch_id, medicine_name, source, destination, timestamp, hash, previous_hash)
-         VALUES (?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO medicine_batches (
+            batch_id, medicine_name, source, destination, timestamp, hash, previous_hash, signature, public_key
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
     )
     .bind(batch_id)
     .bind(medicine_name)
     .bind(source)
     .bind(destination)
     .bind(&timestamp)
-    .bind(&hash)
+    .bind(&batch_hash)
     .bind(&previous_hash)
+    .bind(&signature_base64)
+    .bind(&public_key_pem)
     .execute(pool)
     .await?;
 
-    store_onchain_proof(pool, batch_id, &hash, merkle_root, &timestamp).await?;
+    store_onchain_proof(pool, batch_id, &batch_hash, merkle_root, &timestamp).await?;
 
     Ok(())
 }
 
-/// Stores Merkle + hash proof on-chain (DB).
+/// Stores on-chain proof.
 pub async fn store_onchain_proof(
     pool: &SqlitePool,
     batch_id: &str,
@@ -252,7 +266,7 @@ pub async fn store_onchain_proof(
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
         "INSERT INTO onchain_batches (batch_id, batch_hash, merkle_root, timestamp)
-         VALUES (?, ?, ?, ?)",
+         VALUES (?, ?, ?, ?)"
     )
     .bind(batch_id)
     .bind(batch_hash)

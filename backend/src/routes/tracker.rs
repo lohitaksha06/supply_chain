@@ -11,7 +11,7 @@ use chrono::Utc;
 
 use crate::entities::compute_batch_hash;
 use crate::utils::merkle::build_merkle_root;
-use crate::utils::signatures::{generate_keys, sign_data, verify_signature}; // ✅ Import signatures
+use crate::utils::signatures::{generate_keys, sign_data, verify_signature};
 
 #[derive(Deserialize)]
 pub struct Batch {
@@ -26,7 +26,8 @@ pub struct TrackerResponse {
     pub message: String,
     pub batch_hash: String,
     pub previous_hash: String,
-    pub signature: String,  // ✅ Include signature in response
+    pub signature: String,
+    pub public_key: String,
 }
 
 #[derive(Serialize)]
@@ -41,7 +42,6 @@ pub struct MerkleResponse {
     pub total_batches: usize,
 }
 
-/// POST /api/tracker/add
 async fn add_batch(
     State(pool): State<Arc<SqlitePool>>,
     Json(batch): Json<Batch>,
@@ -66,15 +66,15 @@ async fn add_batch(
         &previous_hash,
     );
 
-    // ✅ Generate keys and sign hash (NOTE: in production you'd persist/load keys)
-    let (private_key, _public_key) = generate_keys();
+    let (private_key, public_key) = generate_keys();
     let signature_bytes = sign_data(&private_key, batch_hash.as_bytes());
     let signature_base64 = base64::encode(signature_bytes);
+    let public_key_base64 = base64::encode(public_key.to_pkcs1_der().unwrap());
 
     sqlx::query(
         "INSERT INTO medicine_batches 
-        (batch_id, medicine_name, source, destination, timestamp, hash, previous_hash) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)"
+        (batch_id, medicine_name, source, destination, timestamp, hash, previous_hash, signature, public_key) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
     )
     .bind(&batch.batch_id)
     .bind(&batch.medicine_name)
@@ -83,25 +83,27 @@ async fn add_batch(
     .bind(&timestamp)
     .bind(&batch_hash)
     .bind(&previous_hash)
+    .bind(&signature_base64)
+    .bind(&public_key_base64)
     .execute(pool.as_ref())
     .await
     .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
 
     Ok(Json(TrackerResponse {
-        message: "Batch added with chained hash + signature".to_string(),
+        message: "Batch added with chained hash + signature + public key".to_string(),
         batch_hash,
         previous_hash,
         signature: signature_base64,
+        public_key: public_key_base64,
     }))
 }
 
-/// GET /api/tracker/verify/:batch_id
 async fn verify_batch(
     State(pool): State<Arc<SqlitePool>>,
     Path(batch_id): Path<String>,
 ) -> Result<Json<VerifyResponse>, (StatusCode, String)> {
     let row = sqlx::query!(
-        "SELECT medicine_name, source, destination, timestamp, hash, previous_hash 
+        "SELECT medicine_name, source, destination, timestamp, hash, previous_hash, signature, public_key
          FROM medicine_batches WHERE batch_id = ?",
         batch_id
     )
@@ -121,11 +123,17 @@ async fn verify_batch(
 
         let is_valid_hash = recomputed_hash == batch.hash;
 
-        // ✅ Signature verification demo (in prod load public key from store)
-        let (_priv, public_key) = generate_keys(); // NOTE: placeholder keys; in real you'd load saved key
-        let fake_signature = sign_data(&_priv, recomputed_hash.as_bytes()); // generate correct sig for demo
+        let is_signature_valid = if let (Some(sig_b64), Some(pubkey_b64)) = (batch.signature, batch.public_key) {
+            let sig_bytes = base64::decode(sig_b64).unwrap_or_default();
+            let pubkey_der = base64::decode(pubkey_b64).unwrap_or_default();
+            let public_key = rsa::RsaPublicKey::from_pkcs1_der(&pubkey_der).unwrap_or_else(|_| {
+                return rsa::RsaPublicKey::new(rsa::BigUint::default(), rsa::BigUint::default()).unwrap();
+            });
 
-        let is_signature_valid = verify_signature(&public_key, recomputed_hash.as_bytes(), &fake_signature);
+            verify_signature(&public_key, recomputed_hash.as_bytes(), &sig_bytes)
+        } else {
+            false
+        };
 
         let msg = if is_valid_hash && is_signature_valid {
             "Hash + signature both valid"
@@ -144,7 +152,6 @@ async fn verify_batch(
     }
 }
 
-/// GET /api/tracker/verifychain
 async fn verify_chain(
     State(pool): State<Arc<SqlitePool>>,
 ) -> Result<Json<VerifyResponse>, (StatusCode, String)> {
@@ -184,7 +191,6 @@ async fn verify_chain(
     }))
 }
 
-/// GET /api/tracker/merkleroot
 async fn get_merkle_root(
     State(pool): State<Arc<SqlitePool>>,
 ) -> Result<Json<MerkleResponse>, (StatusCode, String)> {
@@ -201,7 +207,6 @@ async fn get_merkle_root(
     }))
 }
 
-/// Mount tracker routes
 pub fn tracker_routes(pool: Arc<SqlitePool>) -> Router {
     Router::new()
         .route("/api/tracker/add", post(add_batch))
