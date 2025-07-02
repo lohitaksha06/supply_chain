@@ -12,6 +12,9 @@ use chrono::Utc;
 use crate::entities::compute_batch_hash;
 use crate::utils::merkle::build_merkle_root;
 use crate::utils::signatures::{generate_keys, sign_data, verify_signature};
+use base64;
+use rsa::pkcs1::DecodeRsaPublicKey;
+use rsa::{RsaPublicKey, BigUint};
 
 #[derive(Deserialize)]
 pub struct Batch {
@@ -42,6 +45,8 @@ pub struct MerkleResponse {
     pub total_batches: usize,
 }
 
+/// POST /api/tracker/add
+/// Adds a new medicine batch with hash chaining + signature + public key
 async fn add_batch(
     State(pool): State<Arc<SqlitePool>>,
     Json(batch): Json<Batch>,
@@ -66,11 +71,13 @@ async fn add_batch(
         &previous_hash,
     );
 
+    // Generate RSA key pair and sign the batch hash
     let (private_key, public_key) = generate_keys();
     let signature_bytes = sign_data(&private_key, batch_hash.as_bytes());
     let signature_base64 = base64::encode(signature_bytes);
     let public_key_base64 = base64::encode(public_key.to_pkcs1_der().unwrap());
 
+    // Store batch record
     sqlx::query(
         "INSERT INTO medicine_batches 
         (batch_id, medicine_name, source, destination, timestamp, hash, previous_hash, signature, public_key) 
@@ -98,6 +105,8 @@ async fn add_batch(
     }))
 }
 
+/// GET /api/tracker/verify/:batch_id
+/// Verifies hash and digital signature of a specific batch
 async fn verify_batch(
     State(pool): State<Arc<SqlitePool>>,
     Path(batch_id): Path<String>,
@@ -126,11 +135,12 @@ async fn verify_batch(
         let is_signature_valid = if let (Some(sig_b64), Some(pubkey_b64)) = (batch.signature, batch.public_key) {
             let sig_bytes = base64::decode(sig_b64).unwrap_or_default();
             let pubkey_der = base64::decode(pubkey_b64).unwrap_or_default();
-            let public_key = rsa::RsaPublicKey::from_pkcs1_der(&pubkey_der).unwrap_or_else(|_| {
-                return rsa::RsaPublicKey::new(rsa::BigUint::default(), rsa::BigUint::default()).unwrap();
-            });
 
-            verify_signature(&public_key, recomputed_hash.as_bytes(), &sig_bytes)
+            if let Ok(public_key) = RsaPublicKey::from_pkcs1_der(&pubkey_der) {
+                verify_signature(&public_key, recomputed_hash.as_bytes(), &sig_bytes)
+            } else {
+                false
+            }
         } else {
             false
         };
@@ -152,6 +162,8 @@ async fn verify_batch(
     }
 }
 
+/// GET /api/tracker/verifychain
+/// Verifies full hash chain integrity
 async fn verify_chain(
     State(pool): State<Arc<SqlitePool>>,
 ) -> Result<Json<VerifyResponse>, (StatusCode, String)> {
@@ -191,6 +203,8 @@ async fn verify_chain(
     }))
 }
 
+/// GET /api/tracker/merkleroot
+/// Computes and returns the Merkle root of all batch hashes
 async fn get_merkle_root(
     State(pool): State<Arc<SqlitePool>>,
 ) -> Result<Json<MerkleResponse>, (StatusCode, String)> {
@@ -207,6 +221,7 @@ async fn get_merkle_root(
     }))
 }
 
+/// Mounts all tracker routes
 pub fn tracker_routes(pool: Arc<SqlitePool>) -> Router {
     Router::new()
         .route("/api/tracker/add", post(add_batch))
