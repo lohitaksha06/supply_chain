@@ -9,6 +9,8 @@ import CompanyForm from './components/companyform';
 import BatchTable from './components/batchable';
 import TrackerInput from './components/trackerinput';
 import CustomerForm from './components/customer';
+import VerifyBatch from './components/verifybatch';
+
 
 function App() {
   return (
@@ -24,6 +26,7 @@ function App() {
         <Route path="/track" element={<TrackerInput />} />
         <Route path="/batches" element={<BatchTable />} />
         <Route path="/customer" element={<CustomerForm />} />
+        <Route path="/verify" element={<VerifyBatch />} /> {/* ✅ NEW ROUTE */}
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" />} />
@@ -33,3 +36,4 @@ function App() {
 }
 
 export default App;
+
