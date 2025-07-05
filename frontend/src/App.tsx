@@ -7,8 +7,8 @@ import CompanyHome from './pages/companyhome';
 import HospitalHome from './pages/hospitalhome';
 import CustomerHome from './pages/customerhome';
 
-import companyform from './components/companyform';
-import BatchTable from './components/BatchTable';
+import CompanyForm from './components/companyform';
+import BatchTable from './components/batchtable';
 import TrackerInput from './components/trackerinput';
 import CustomerForm from './components/customer';
 import VerifyBatch from './components/verifybatch';
