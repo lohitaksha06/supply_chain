@@ -1,52 +1,85 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const CompanyHome = () => {
+const CompanyHome: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleRegisterBatch = () => navigate('/register');
-  const handleViewInventory = () => alert('View Inventory - Coming Soon!');
-  const handleVerify = () => navigate('/verify');
+  const handleLogout = () => {
+    localStorage.removeItem('pharmachain_user');
+    navigate('/');
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 px-6 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-blue-700">Welcome, Company Admin</h1>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-        <div
-          className="bg-white shadow-md rounded-lg p-6 hover:bg-blue-50 cursor-pointer transition"
-          onClick={handleRegisterBatch}
+    <div className="min-h-screen bg-gradient-to-br from-white to-blue-100 p-6">
+      {/* Top Bar */}
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold text-blue-800">Welcome, PharmaCorp</h1>
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
         >
-          <h2 className="text-xl font-semibold text-blue-600 mb-2">Register New Batch</h2>
-          <p className="text-gray-600 text-sm">Log a new medicine batch with details and hash.</p>
+          Logout
+        </button>
+      </div>
+
+      {/* Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div className="bg-white shadow-md rounded-xl p-6 border-l-4 border-blue-600">
+          <p className="text-gray-500 text-sm">Batches Registered</p>
+          <h2 className="text-2xl font-bold text-blue-700">12</h2>
         </div>
-
-        <div
-          className="bg-white shadow-md rounded-lg p-6 hover:bg-blue-50 cursor-pointer transition"
-          onClick={handleViewInventory}
-        >
-          <h2 className="text-xl font-semibold text-blue-600 mb-2">View Inventory</h2>
-          <p className="text-gray-600 text-sm">Access your current registered batches and stock.</p>
+        <div className="bg-white shadow-md rounded-xl p-6 border-l-4 border-green-600">
+          <p className="text-gray-500 text-sm">Pending Verifications</p>
+          <h2 className="text-2xl font-bold text-green-700">4</h2>
         </div>
-
-        <div
-          className="bg-white shadow-md rounded-lg p-6 hover:bg-blue-50 cursor-pointer transition"
-          onClick={handleVerify}
-        >
-          <h2 className="text-xl font-semibold text-blue-600 mb-2">Verify Batch</h2>
-          <p className="text-gray-600 text-sm">Check batch authenticity using blockchain hashes.</p>
+        <div className="bg-white shadow-md rounded-xl p-6 border-l-4 border-yellow-500">
+          <p className="text-gray-500 text-sm">In Transit</p>
+          <h2 className="text-2xl font-bold text-yellow-600">6</h2>
+        </div>
+        <div className="bg-white shadow-md rounded-xl p-6 border-l-4 border-purple-600">
+          <p className="text-gray-500 text-sm">Delivered</p>
+          <h2 className="text-2xl font-bold text-purple-700">20</h2>
         </div>
       </div>
 
-      {/* Recent Activity Section */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-lg font-bold text-gray-800 mb-4">Recent Activity</h2>
-        <ul className="list-disc pl-5 text-gray-700 text-sm space-y-2">
-          <li>Batch `#MEDX-1283` registered - July 4, 2025</li>
-          <li>Verified batch `#MEDX-1024` - July 3, 2025</li>
-          <li>Logged out at 5:32 PM - July 2, 2025</li>
-        </ul>
+      {/* Navigation Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <button
+          onClick={() => navigate('/register')}
+          className="w-full bg-blue-600 text-white py-3 rounded-lg shadow hover:bg-blue-700 transition"
+        >
+          Register New Batch
+        </button>
+
+        <button
+          onClick={() => navigate('/batches')}
+          className="w-full bg-indigo-600 text-white py-3 rounded-lg shadow hover:bg-indigo-700 transition"
+        >
+          View All Batches
+        </button>
+
+        <button
+          onClick={() => navigate('/track')}
+          className="w-full bg-green-600 text-white py-3 rounded-lg shadow hover:bg-green-700 transition"
+        >
+          Track Medicine
+        </button>
+
+        <button
+          onClick={() => navigate('/verify')}
+          className="w-full bg-yellow-500 text-white py-3 rounded-lg shadow hover:bg-yellow-600 transition"
+        >
+          Verify Batch Authenticity
+        </button>
+      </div>
+
+      {/* Optional: Company Info / Animated Card */}
+      <div className="mt-10 bg-white shadow-lg rounded-xl p-6">
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">Company Overview</h3>
+        <p className="text-gray-600">
+          PharmaCorp is a registered pharmaceutical supplier committed to transparent and tamper-proof medicine tracking
+          through blockchain integration.
+        </p>
       </div>
     </div>
   );
