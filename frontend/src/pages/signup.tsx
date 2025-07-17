@@ -41,9 +41,9 @@ const Signup = () => {
       localStorage.setItem('role', data.role); // store the role for routing later
 
       // Redirect based on role
-      if (data.role === 'company') navigate('/dashboard/company');
-      else if (data.role === 'hospital') navigate('/dashboard/hospital');
-      else if (data.role === 'patient') navigate('/dashboard/customer');
+      if (data.role === 'company') navigate('/company/dashboard');
+      else if (data.role === 'hospital') navigate('/hospital/dashboard');
+      else if (data.role === 'patient') navigate('/customer/dashboard');
       else navigate('/home'); // fallback
 
     } catch (err) {

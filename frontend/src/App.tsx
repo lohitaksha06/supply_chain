@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import AuthRoute from './components/AuthRoute';
 
 import Home from './pages/home';
 import Login from './pages/login';
@@ -25,18 +26,18 @@ function App() {
         <Route path="/signup" element={<Signup />} />
 
         {/* Main pages */}
-        <Route path="/home" element={<Home />} />
-        <Route path="/register" element={<CompanyForm />} />
-        <Route path="/track" element={<TrackerInput />} />
-        <Route path="/batches" element={<BatchTable />} />
-        <Route path="/customer" element={<CustomerForm />} />
-        <Route path="/verify" element={<VerifyBatch />} />
-        <Route path="/hospital" element={<HospitalForm />} />
+        <Route path="/home" element={<AuthRoute element={<Home />} />} />
+        <Route path="/register" element={<AuthRoute element={<CompanyForm />} />} />
+        <Route path="/track" element={<AuthRoute element={<TrackerInput />} />} />
+        <Route path="/batches" element={<AuthRoute element={<BatchTable />} />} />
+        <Route path="/customer" element={<AuthRoute element={<CustomerForm />} />} />
+        <Route path="/verify" element={<AuthRoute element={<VerifyBatch />} />} />
+        <Route path="/hospital" element={<AuthRoute element={<HospitalForm />} />} />
 
         {/* Dashboards */}
-        <Route path="/company/dashboard" element={<CompanyDashboard />} />
-        <Route path="/customer/dashboard" element={<CustomerDashboard />} />
-        <Route path="/hospital/dashboard" element={<HospitalDashboard />} />
+        <Route path="/company/dashboard" element={<AuthRoute element={<CompanyDashboard />} />} />
+        <Route path="/customer/dashboard" element={<AuthRoute element={<CustomerDashboard />} />} />
+        <Route path="/hospital/dashboard" element={<AuthRoute element={<HospitalDashboard />} />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" />} />
