@@ -1,60 +1,93 @@
-// src/components/hospitalform.tsx
-import { useState } from "react";
+import React, { useState } from "react";
 
-const HospitalForm = () => {
-  const [formData, setFormData] = useState({
-    hospitalName: '',
-    hospitalID: '',
-    medicineNeeded: '',
-    quantity: '',
-  });
+function HospitalForm() {
+  const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
+  const [registrationId, setRegistrationId] = useState("");
+  const [medicineNeeded, setMedicineNeeded] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Hospital request submitted:", formData);
-    // TODO: Send this to backend
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("http://localhost:3000/api/hospitals/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          location,
+          registration_id: registrationId,
+          medicine_needed: medicineNeeded,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to register hospital");
+      }
+
+      setMessage("✅ Hospital registered successfully!");
+      setName("");
+      setLocation("");
+      setRegistrationId("");
+      setMedicineNeeded("");
+    } catch (error) {
+      console.error(error);
+      setMessage("❌ Something went wrong. Try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-teal-100 to-cyan-200">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Hospital Medicine Request</h2>
+    <div style={{ marginBottom: "2rem" }}>
+      <h2>Register Hospital</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Hospital Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        /><br /><br />
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Hospital Name</label>
-          <input type="text" name="hospitalName" value={formData.hospitalName} onChange={handleChange}
-            required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400" />
-        </div>
+        <input
+          type="text"
+          placeholder="Location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          required
+        /><br /><br />
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Hospital ID</label>
-          <input type="text" name="hospitalID" value={formData.hospitalID} onChange={handleChange}
-            required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400" />
-        </div>
+        <input
+          type="text"
+          placeholder="Registration ID"
+          value={registrationId}
+          onChange={(e) => setRegistrationId(e.target.value)}
+          required
+        /><br /><br />
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Medicine Needed</label>
-          <input type="text" name="medicineNeeded" value={formData.medicineNeeded} onChange={handleChange}
-            required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400" />
-        </div>
+        <input
+          type="text"
+          placeholder="Medicine Needed"
+          value={medicineNeeded}
+          onChange={(e) => setMedicineNeeded(e.target.value)}
+          required
+        /><br /><br />
 
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700">Quantity</label>
-          <input type="number" name="quantity" value={formData.quantity} onChange={handleChange}
-            required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400" />
-        </div>
-
-        <button type="submit" className="w-full bg-cyan-600 text-white py-2 rounded hover:bg-cyan-700 transition">
-          Submit Request
+        <button type="submit" disabled={loading}>
+          {loading ? "Registering..." : "Register Hospital"}
         </button>
       </form>
+
+      {message && <p style={{ marginTop: "1rem" }}>{message}</p>}
     </div>
   );
-};
+}
 
 export default HospitalForm;

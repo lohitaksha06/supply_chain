@@ -1,121 +1,123 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import "./login.css";
 
-const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+const Login = () => {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
 
-    if (!email || !password) {
-      setError('Please fill in all fields.');
-      return;
-    }
+    try {
+      const response = await fetch('http://localhost:3001/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-
-      if (email === 'admin@pharma.com' && password === 'password123') {
-        if (rememberMe) {
-          localStorage.setItem('pharmachain_user', email);
-        }
-        navigate('/customerhome');
-      } else {
-        setError('Invalid credentials. Try again.');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Login failed');
       }
-    }, 1500);
+
+      const data = await response.json();
+
+      // Save token and user info in localStorage for persistent login
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // Redirect to home page after successful login
+      navigate('/home');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-200 to-blue-600">
-      <div className="bg-white shadow-xl rounded-2xl p-10 w-full max-w-md animate-fade-in">
-        <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">PharmaChain Login</h2>
+    <div className="login-container">
+      <div className="login-left-panel">
+        <div className="login-branding">
+          <h1>Pharma<span>Chain</span></h1>
+          <p>Secure access to medicine records and track your medicine location</p>
+        </div>
+        <div className="login-illustration">
+          {/* Optional image/illustration */}
+        </div>
+      </div>
+      
+      <div className="login-form-container">
+        <div className="login-form-wrapper">
+          <h2>Welcome Back</h2>
+          <p className="login-subtitle">Sign in to your account</p>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              placeholder="you@example.com"
-              required
-            />
-          </div>
+          {error && <div className="error-message">{error}</div>}
 
-          <div className="relative">
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-            <input
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none pr-10"
-              placeholder="••••••••"
-              required
-            />
-            <span
-              className="absolute right-3 top-9 text-sm text-blue-500 cursor-pointer select-none"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? 'Hide' : 'Show'}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm text-gray-700">
+          <form className="login-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="email">Email Address</label>
               <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="form-checkbox h-4 w-4 text-blue-600"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="doctor@medicalcenter.com"
+                className="form-input"
+                value={formData.email}
+                onChange={handleChange}
+                required
               />
-              Remember me
-            </label>
-            <a href="#" className="text-sm text-blue-600 hover:underline">
-              Forgot password?
-            </a>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                className="form-input"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+              <div className="forgot-password">
+                <a href="#">Forgot password?</a>
+              </div>
+            </div>
+            
+            <button type="submit" className="login-button">
+              Sign In
+            </button>
+            
+            <div className="login-divider">
+              <span>or</span>
+            </div>
+            
+            <button type="button" className="sso-button">
+              Sign in with Google
+            </button>
+          </form>
+          
+          <div className="login-footer">
+            Don't have an account?{" "}
+            <button className="register-button" onClick={() => navigate("/signup")}>
+              Register here
+            </button>
           </div>
-
-          {error && <p className="text-sm text-red-500 text-center">{error}</p>}
-
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" fill="none" />
-                  <path
-                    className="opacity-75"
-                    fill="white"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                  />
-                </svg>
-                Logging in...
-              </span>
-            ) : (
-              'Log In'
-            )}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-gray-600 mt-6">
-          Don’t have an account?{' '}
-          <a href="/signup" className="text-blue-700 font-semibold hover:underline">
-            Sign up
-          </a>
-        </p>
+        </div>
+        
+        <div className="login-footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Use</a>
+          <a href="#">Help Center</a>
+        </div>
       </div>
     </div>
   );

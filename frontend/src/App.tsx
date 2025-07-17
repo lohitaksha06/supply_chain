@@ -1,17 +1,21 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
+import Home from './pages/home';
 import Login from './pages/login';
 import Signup from './pages/signup';
-import CompanyHome from './pages/companyhome';
-import HospitalHome from './pages/hospitalhome';
-import CustomerHome from './pages/customerhome';
 
 import CompanyForm from './components/companyform';
-import BatchTable from './components/batchtable';
+import BatchTable from './components/batchable';
 import TrackerInput from './components/trackerinput';
 import CustomerForm from './components/customer';
 import VerifyBatch from './components/verifybatch';
+import HospitalForm from './components/hospitalform';
+
+// Dashboards (FIXED: Proper PascalCase)
+import CompanyDashboard from './pages/dashboardpages/companydashboard';
+import CustomerDashboard from './pages/dashboardpages/customerdashboard';
+import HospitalDashboard from './pages/dashboardpages/hospitaldashboard';
 
 function App() {
   return (
@@ -21,19 +25,21 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Dashboards */}
-        <Route path="/companyhome" element={<CompanyHome />} />
-        <Route path="/hospitalhome" element={<HospitalHome />} />
-        <Route path="/customerhome" element={<CustomerHome />} />
-
-        {/* Features */}
+        {/* Main pages */}
+        <Route path="/home" element={<Home />} />
         <Route path="/register" element={<CompanyForm />} />
         <Route path="/track" element={<TrackerInput />} />
-        <Route path="/verify" element={<VerifyBatch />} />
         <Route path="/batches" element={<BatchTable />} />
         <Route path="/customer" element={<CustomerForm />} />
+        <Route path="/verify" element={<VerifyBatch />} />
+        <Route path="/hospital" element={<HospitalForm />} />
 
-        {/* Catch-all */}
+        {/* Dashboards */}
+        <Route path="/company/dashboard" element={<CompanyDashboard />} />
+        <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+        <Route path="/hospital/dashboard" element={<HospitalDashboard />} />
+
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

@@ -1,23 +1,70 @@
-import React from 'react';
+import React, { useState } from "react";
 
-const TrackerInput = () => {
+function TrackerInput() {
+  const [batchId, setBatchId] = useState("");
+  const [result, setResult] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResult(null);
+    setError(null);
+
+    if (!batchId.trim()) {
+      setError("❌ Please enter a valid Batch ID.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:3000/api/tracker/view/${batchId}`);
+      if (!res.ok) {
+        throw new Error("Batch not found or server error");
+      }
+      const data = await res.json();
+      setResult(JSON.stringify(data, null, 2));
+    } catch (err) {
+      setError("❌ Failed to fetch batch details.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 shadow-md rounded w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4 text-center">Track Medicine Batch</h2>
+    <div style={{ marginBottom: "2rem" }}>
+      <h2>Track a Medicine Batch</h2>
+      <form onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Enter Batch ID"
-          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring"
+          value={batchId}
+          onChange={(e) => setBatchId(e.target.value)}
+          required
         />
-        <button
-          className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-        >
-          Track
+        <button type="submit" disabled={loading} style={{ marginLeft: "1rem" }}>
+          {loading ? "Tracking..." : "Track"}
         </button>
-      </div>
+      </form>
+
+      {error && (
+        <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>
+      )}
+
+      {result && (
+        <pre
+          style={{
+            marginTop: "1rem",
+            background: "#f4f4f4",
+            padding: "1rem",
+            borderRadius: "6px",
+          }}
+        >
+          {result}
+        </pre>
+      )}
     </div>
   );
-};
+}
 
 export default TrackerInput;
