@@ -11,6 +11,9 @@ import TrackerInput from './components/trackerinput';
 import CustomerForm from './components/customer';
 import VerifyBatch from './components/verifybatch';
 import HospitalForm from './components/hospitalform';
+import CompanyHome from './components/companyhome';
+import CustomerHome from './components/customerhome';
+import HospitalHome from './components/hospitalhome';
 
 // Dashboards (FIXED: Proper PascalCase)
 import CompanyDashboard from './pages/dashboardpages/companydashboard';
@@ -34,10 +37,15 @@ function App() {
         <Route path="/verify" element={<AuthRoute element={<VerifyBatch />} />} />
         <Route path="/hospital" element={<AuthRoute element={<HospitalForm />} />} />
 
-        {/* Dashboards */}
+        {/* Dashboards and Home Pages */}
         <Route path="/company/dashboard" element={<AuthRoute element={<CompanyDashboard />} />} />
+        <Route path="/company/home" element={<AuthRoute element={<CompanyHome />} />} />
+        
         <Route path="/customer/dashboard" element={<AuthRoute element={<CustomerDashboard />} />} />
+        <Route path="/customer/home" element={<AuthRoute element={<CustomerHome />} />} />
+        
         <Route path="/hospital/dashboard" element={<AuthRoute element={<HospitalDashboard />} />} />
+        <Route path="/hospital/home" element={<AuthRoute element={<HospitalHome />} />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" />} />
