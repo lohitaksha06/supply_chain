@@ -1,16 +1,31 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import AuthRoute from './components/AuthRoute';
+import AuthRoute from './utils/AuthRoute';
 
-import Home from './pages/home';
-import Login from './pages/login';
-import Signup from './pages/signup';
+// Auth Pages
+import Login from './pages/auth/login';
+import Signup from './pages/auth/signup';
 
-import CompanyForm from './components/companyform';
-import BatchTable from './components/batchable';
-import TrackerInput from './components/trackerinput';
-import CustomerForm from './components/customer';
-import VerifyBatch from './components/verifybatch';
-import HospitalForm from './components/hospitalform';
+// Main Pages
+import Home from './pages/home/home';
+
+// Form Components
+import CompanyForm from './components/forms/CompanyForm';
+import CustomerForm from './components/forms/CustomerForm';
+import HospitalForm from './components/forms/HospitalForm';
+import TrackerInput from './components/forms/TrackerInput';
+
+// Dashboard Components
+import BatchTable from './components/dashboard/DataTable';
+
+// Dashboard Pages
+import CompanyDashboard from './pages/dashboard/companydashboard';
+import CustomerDashboard from './pages/dashboard/customerdashboard';
+import HospitalDashboard from './pages/dashboard/hospitaldashboard';
+
+// Home Pages
+import CompanyHome from './components/companyhome';
+import CustomerHome from './components/customerhome';
+import HospitalHome from './components/hospitalhome';
 import CompanyHome from './components/companyhome';
 import CustomerHome from './components/customerhome';
 import HospitalHome from './components/hospitalhome';
