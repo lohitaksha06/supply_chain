@@ -3,7 +3,7 @@ pub mod entities;
 use sqlx::{sqlite::SqlitePoolOptions, SqlitePool};
 use std::env;
 
-use crate::db::entities::User;
+use crate::models::User;
 use crate::db::entities::create_tables;
 
 /// Initializes the database by creating necessary tables.

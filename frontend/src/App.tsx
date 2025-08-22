@@ -1,71 +1,69 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import AuthRoute from './utils/AuthRoute';
+
+// The corrected import for your route protection component
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Layout
-import Navbar from './components/common/Navbar';
-import Footer from './components/common/Footer';
-import Sidebar from './components/common/Sidebar';
+import { Navbar } from './components/Navbar'; // Corrected Path
+import Footer from './components/Footer'; // Corrected Path
 
-// Auth
-import Login from './pages/auth/Login';
-import Signup from './pages/auth/Signup';
+// Auth Pages (Paths are case-sensitive, check your filenames)
+import Login from './pages/auth/login';
+import Signup from './pages/auth/signup';
 
-// Home
-import Home from './pages/home/Home';
-import CompanyHome from './pages/home/CompanyHome';
-import CustomerHome from './pages/home/CustomerHome';
-import HospitalHome from './pages/home/HospitalHome';
+// Home (Component, not a Page - based on your screenshot)
+import CustomerHome from './components/customerhome';
 
-// Dashboards
-import CompanyDashboard from './pages/dashboard/CompanyDashboard';
-import CustomerDashboard from './pages/dashboard/CustomerDashboard';
-import HospitalDashboard from './pages/dashboard/HospitalDashboard';
+// Dashboards (check filenames for case)
+import CompanyDashboard from './pages/dashboard/companydashboard';
+import CustomerDashboard from './pages/dashboard/customerdashboard';
+import HospitalDashboard from './pages/dashboard/hospitaldashboard';
 
-// Forms
+// Forms (Assuming a 'forms' folder exists in 'components')
 import CompanyForm from './components/forms/CompanyForm';
-import CustomerForm from './components/forms/CustomerForm';
+// import CustomerForm from './components/forms/CustomerForm';
 import HospitalForm from './components/forms/HospitalForm';
 import TrackerInput from './components/forms/TrackerInput';
 
 // Dashboard Components
 import BatchTable from './components/dashboard/DataTable';
-import VerifyBatch from './components/dashboard/VerifyBatch';
+import VerifyBatch from './components/verifybatch';
 
 function App() {
   return (
     <Router>
-      {/* Global layout (optional) */}
       <Navbar />
-      {/* Add Sidebar or Footer here globally if needed */}
       <Routes>
-        {/* Auth */}
+        {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* General Home */}
-        <Route path="/home" element={<AuthRoute element={<Home />} />} />
+        {/* Protected Routes */}
+        {/* All routes inside here will first check for authentication */}
+        <Route element={<ProtectedRoute element={<div></div>} />}>
+          <Route path="/customer/home" element={<CustomerHome />} />
 
-        {/* Forms */}
-        <Route path="/register" element={<AuthRoute element={<CompanyForm />} />} />
-        <Route path="/customer" element={<AuthRoute element={<CustomerForm />} />} />
-        <Route path="/hospital" element={<AuthRoute element={<HospitalForm />} />} />
-        <Route path="/track" element={<AuthRoute element={<TrackerInput />} />} />
+          {/* Forms */}
+          <Route path="/register" element={<CompanyForm />} />
+          {/* <Route path="/customer" element={<CustomerForm />} /> */}
+          <Route path="/hospital" element={<HospitalForm />} />
+          <Route path="/track" element={<TrackerInput />} />
 
-        {/* Dashboard Pages */}
-        <Route path="/company/dashboard" element={<AuthRoute element={<CompanyDashboard />} />} />
-        <Route path="/customer/dashboard" element={<AuthRoute element={<CustomerDashboard />} />} />
-        <Route path="/hospital/dashboard" element={<AuthRoute element={<HospitalDashboard />} />} />
+          {/* Dashboard Pages */}
+          <Route path="/company/dashboard" element={<CompanyDashboard />} />
+          <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+          <Route path="/hospital/dashboard" element={<HospitalDashboard />} />
 
-        {/* Home Pages by Role */}
-        <Route path="/company/home" element={<AuthRoute element={<CompanyHome />} />} />
-        <Route path="/customer/home" element={<AuthRoute element={<CustomerHome />} />} />
-        <Route path="/hospital/home" element={<AuthRoute element={<HospitalHome />} />} />
+          {/* Dashboard Utilities */}
+          <Route path="/batches" element={<BatchTable data={[]} columns={[]} />} />
+          <Route path="/verify" element={<VerifyBatch />} />
 
-        {/* Dashboard Utilities */}
-        <Route path="/batches" element={<AuthRoute element={<BatchTable />} />} />
-        <Route path="/verify" element={<AuthRoute element={<VerifyBatch />} />} />
+          {/* NOTE: You probably don't need all the '/company/home', '/customer/home', etc. routes
+              if you have a single home component that changes based on user role.
+              I have included the main customerhome based on your screenshots. */}
+        </Route>
 
-        {/* Fallback */}
+        {/* Fallback for any route that doesn't match */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <Footer />

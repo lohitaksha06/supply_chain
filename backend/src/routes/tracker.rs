@@ -9,12 +9,12 @@ use sqlx::SqlitePool;
 use std::sync::Arc;
 use chrono::Utc;
 
-use crate::entities::compute_batch_hash;
+use crate::db::entities::compute_batch_hash;
 use crate::utils::merkle::build_merkle_root;
-use crate::utils::signatures::{generate_keys, sign_data, verify_signature};
+use crate::utils::signature::{generate_keys, sign_data, verify_signature};
 use base64;
 use rsa::pkcs1::DecodeRsaPublicKey;
-use rsa::{RsaPublicKey, BigUint};
+use rsa::{BigUint, RsaPublicKey};
 
 #[derive(Deserialize)]
 pub struct Batch {

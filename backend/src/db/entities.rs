@@ -2,9 +2,13 @@ use sqlx::SqlitePool;
 use uuid::Uuid;
 use chrono::Utc;
 use sha2::{Sha256, Digest};
-use rsa::{RsaPrivateKey, RsaPublicKey, pkcs1::DecodeRsaPublicKey};
-use rsa::signature::Verifier;
-use base64::{decode, encode};
+use base64::{engine::general_purpose, Engine as _};
+use rsa::{
+    pkcs1v15::{self},
+    sha2::Sha256,
+    signature::{Signer, Verifier},
+    RsaPrivateKey, RsaPublicKey,
+};
 
 /// Structs
 #[derive(sqlx::FromRow, Debug)]

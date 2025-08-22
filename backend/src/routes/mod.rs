@@ -2,7 +2,6 @@ pub mod company;
 pub mod customer;
 pub mod hospital;
 pub mod tracker;
-pub mod entities;
 
 use axum::Router;
 use std::sync::Arc;
