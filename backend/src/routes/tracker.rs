@@ -5,16 +5,15 @@ use axum::{
     Router,
 };
 use serde::{Deserialize, Serialize};
-use sqlx::SqlitePool;
+use sqlx::{SqlitePool, Row};
 use std::sync::Arc;
 use chrono::Utc;
 
-use crate::db::entities::compute_batch_hash;
+use crate::db::entities::{compute_batch_hash, generate_keys, sign_data, verify_signature};
 use crate::utils::merkle::build_merkle_root;
-use crate::utils::signature::{generate_keys, sign_data, verify_signature};
-use base64;
-use rsa::pkcs1::DecodeRsaPublicKey;
-use rsa::{BigUint, RsaPublicKey};
+use base64::{engine::general_purpose, Engine};
+use rsa::pkcs1::{DecodeRsaPublicKey, EncodeRsaPublicKey};
+use rsa::RsaPublicKey;
 
 #[derive(Deserialize)]
 pub struct Batch {
@@ -74,8 +73,8 @@ async fn add_batch(
     // Generate RSA key pair and sign the batch hash
     let (private_key, public_key) = generate_keys();
     let signature_bytes = sign_data(&private_key, batch_hash.as_bytes());
-    let signature_base64 = base64::encode(signature_bytes);
-    let public_key_base64 = base64::encode(public_key.to_pkcs1_der().unwrap());
+    let signature_base64 = general_purpose::STANDARD.encode(&signature_bytes);
+    let public_key_base64 = general_purpose::STANDARD.encode(public_key.to_pkcs1_der().unwrap().as_bytes());
 
     // Store batch record
     sqlx::query(
@@ -111,31 +110,37 @@ async fn verify_batch(
     State(pool): State<Arc<SqlitePool>>,
     Path(batch_id): Path<String>,
 ) -> Result<Json<VerifyResponse>, (StatusCode, String)> {
-    let row = sqlx::query!(
+    let row = sqlx::query(
         "SELECT medicine_name, source, destination, timestamp, hash, previous_hash, signature, public_key
-         FROM medicine_batches WHERE batch_id = ?",
-        batch_id
+         FROM medicine_batches WHERE batch_id = ?"
     )
+    .bind(&batch_id)
     .fetch_optional(pool.as_ref())
     .await
     .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 
     if let Some(batch) = row {
+        let medicine_name: String = batch.try_get("medicine_name").unwrap_or_default();
+        let source: String = batch.try_get("source").unwrap_or_default();
+        let destination: String = batch.try_get("destination").unwrap_or_default();
+        let timestamp: String = batch.try_get("timestamp").unwrap_or_default();
+        let previous_hash: String = batch.try_get("previous_hash").unwrap_or_default();
+        let hash: String = batch.try_get("hash").unwrap_or_default();
+
         let recomputed_hash = compute_batch_hash(
             &batch_id,
-            &batch.medicine_name,
-            &batch.source,
-            &batch.destination,
-            &batch.timestamp,
-            &batch.previous_hash,
+            &medicine_name,
+            &source,
+            &destination,
+            &timestamp,
+            &previous_hash,
         );
 
-        let is_valid_hash = recomputed_hash == batch.hash;
+    let is_valid_hash = recomputed_hash == hash;
 
-        let is_signature_valid = if let (Some(sig_b64), Some(pubkey_b64)) = (batch.signature, batch.public_key) {
-            let sig_bytes = base64::decode(sig_b64).unwrap_or_default();
-            let pubkey_der = base64::decode(pubkey_b64).unwrap_or_default();
-
+    let is_signature_valid = if let (Some(sig_b64), Some(pubkey_b64)) = (batch.try_get::<Option<String>, _>("signature").ok().flatten(), batch.try_get::<Option<String>, _>("public_key").ok().flatten()) {
+            let sig_bytes = general_purpose::STANDARD.decode(sig_b64).unwrap_or_default();
+            let pubkey_der = general_purpose::STANDARD.decode(pubkey_b64).unwrap_or_default();
             if let Ok(public_key) = RsaPublicKey::from_pkcs1_der(&pubkey_der) {
                 verify_signature(&public_key, recomputed_hash.as_bytes(), &sig_bytes)
             } else {
@@ -167,7 +172,7 @@ async fn verify_batch(
 async fn verify_chain(
     State(pool): State<Arc<SqlitePool>>,
 ) -> Result<Json<VerifyResponse>, (StatusCode, String)> {
-    let batches = sqlx::query!(
+    let batches = sqlx::query(
         "SELECT batch_id, medicine_name, source, destination, timestamp, hash, previous_hash 
          FROM medicine_batches ORDER BY timestamp ASC"
     )
@@ -177,24 +182,31 @@ async fn verify_chain(
 
     let mut expected_prev_hash = "GENESIS".to_string();
 
-    for batch in batches {
+    for row in batches {
+        let batch_id: String = row.try_get("batch_id").unwrap_or_default();
+        let medicine_name: String = row.try_get("medicine_name").unwrap_or_default();
+        let source: String = row.try_get("source").unwrap_or_default();
+        let destination: String = row.try_get("destination").unwrap_or_default();
+        let timestamp: String = row.try_get("timestamp").unwrap_or_default();
+        let hash: String = row.try_get("hash").unwrap_or_default();
+        let previous_hash: String = row.try_get("previous_hash").unwrap_or_default();
         let recomputed_hash = compute_batch_hash(
-            &batch.batch_id,
-            &batch.medicine_name,
-            &batch.source,
-            &batch.destination,
-            &batch.timestamp,
+            &batch_id,
+            &medicine_name,
+            &source,
+            &destination,
+            &timestamp,
             &expected_prev_hash,
         );
 
-        if recomputed_hash != batch.hash || batch.previous_hash != expected_prev_hash {
+        if recomputed_hash != hash || previous_hash != expected_prev_hash {
             return Ok(Json(VerifyResponse {
                 valid: false,
-                message: format!("Chain broken at batch ID: {}", batch.batch_id),
+                message: format!("Chain broken at batch ID: {}", batch_id),
             }));
         }
 
-        expected_prev_hash = batch.hash.clone();
+        expected_prev_hash = hash.clone();
     }
 
     Ok(Json(VerifyResponse {

@@ -4,11 +4,10 @@ use chrono::Utc;
 use sha2::{Sha256, Digest};
 use base64::{engine::general_purpose, Engine as _};
 use rsa::{
-    pkcs1v15::{self},
-    sha2::Sha256,
-    signature::{Signer, Verifier},
+    sha2::Sha256 as RsaSha256,
     RsaPrivateKey, RsaPublicKey,
 };
+use rsa::pkcs1::{EncodeRsaPublicKey, DecodeRsaPublicKey};
 
 /// Structs
 #[derive(sqlx::FromRow, Debug)]
@@ -73,6 +72,31 @@ pub fn compute_batch_hash(
     let mut hasher = Sha256::new();
     hasher.update(data.as_bytes());
     format!("{:x}", hasher.finalize())
+}
+
+/// Crypto helpers (RSA PKCS#1 v1.5 + SHA-256)
+pub fn generate_keys() -> (RsaPrivateKey, RsaPublicKey) {
+    let mut rng = rand::thread_rng();
+    let bits = 2048;
+    let private_key = RsaPrivateKey::new(&mut rng, bits).expect("failed to generate key");
+    let public_key = RsaPublicKey::from(&private_key);
+    (private_key, public_key)
+}
+
+pub fn sign_data(private_key: &RsaPrivateKey, data: &[u8]) -> Vec<u8> {
+    private_key
+        .sign(rsa::Pkcs1v15Sign::new::<RsaSha256>(), data)
+        .expect("sign failed")
+}
+
+pub fn verify_signature(public_key: &RsaPublicKey, data: &[u8], signature_bytes: &[u8]) -> bool {
+    public_key
+        .verify(
+            rsa::Pkcs1v15Sign::new::<RsaSha256>(),
+            data,
+            signature_bytes,
+        )
+        .is_ok()
 }
 
 /// Create tables
@@ -204,12 +228,12 @@ pub async fn add_batch_with_hash(
         batch_id, medicine_name, source, destination, &timestamp, &previous_hash,
     );
 
-    let private_key = RsaPrivateKey::new(&mut rand::thread_rng(), 2048).unwrap();
-    let public_key = RsaPublicKey::from(&private_key);
-    let signature_bytes = private_key.sign(rsa::Pkcs1v15Sign::new::<Sha256>(), batch_hash.as_bytes()).unwrap();
+    let (private_key, public_key) = generate_keys();
+    let signature_bytes = sign_data(&private_key, batch_hash.as_bytes());
 
-    let signature_base64 = encode(&signature_bytes);
-    let public_key_pem = encode(public_key.to_pkcs1_der().unwrap());
+    let public_key_der = public_key.to_pkcs1_der().unwrap();
+    let signature_base64 = general_purpose::STANDARD.encode(&signature_bytes);
+    let public_key_pem = general_purpose::STANDARD.encode(public_key_der.as_bytes());
 
     sqlx::query(
         "INSERT INTO medicine_batches (
@@ -250,19 +274,17 @@ pub async fn store_onchain_proof(pool: &SqlitePool, batch_id: &str, batch_hash: 
 
 /// Verify batch
 pub async fn verify_batch_signature(pool: &SqlitePool, batch_id: &str) -> Result<(bool, String), sqlx::Error> {
-    let batch = sqlx::query_as!(
-        MedicineBatch,
-        "SELECT * FROM medicine_batches WHERE batch_id = ?",
-        batch_id
+    let batch = sqlx::query_as::<_, MedicineBatch>(
+        "SELECT id, batch_id, medicine_name, source, destination, timestamp, hash, previous_hash, signature, public_key FROM medicine_batches WHERE batch_id = ?"
     )
+    .bind(batch_id)
     .fetch_one(pool)
     .await?;
 
-    let onchain = sqlx::query_as!(
-        OnchainBatch,
-        "SELECT * FROM onchain_batches WHERE batch_id = ?",
-        batch_id
+    let onchain = sqlx::query_as::<_, OnchainBatch>(
+        "SELECT batch_id, batch_hash, merkle_root, timestamp FROM onchain_batches WHERE batch_id = ?"
     )
+    .bind(batch_id)
     .fetch_one(pool)
     .await?;
 
@@ -279,14 +301,11 @@ pub async fn verify_batch_signature(pool: &SqlitePool, batch_id: &str) -> Result
         return Ok((false, "Batch hash mismatch (Merkle root invalid)".to_string()));
     }
 
-    let pub_key_der = decode(&batch.public_key.unwrap()).unwrap();
+    let pub_key_der = general_purpose::STANDARD.decode(&batch.public_key.clone().unwrap()).unwrap();
     let pub_key = RsaPublicKey::from_pkcs1_der(&pub_key_der).unwrap();
+    let signature = general_purpose::STANDARD.decode(&batch.signature.clone().unwrap()).unwrap();
 
-    let signature = decode(&batch.signature.unwrap()).unwrap();
-
-    let verified = pub_key
-        .verify(rsa::Pkcs1v15Sign::new::<Sha256>(), recomputed_hash.as_bytes(), &signature)
-        .is_ok();
+    let verified = verify_signature(&pub_key, recomputed_hash.as_bytes(), &signature);
 
     if verified {
         Ok((true, "Batch signature and Merkle proof valid".to_string()))
