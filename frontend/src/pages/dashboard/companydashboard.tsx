@@ -1,8 +1,8 @@
 // pages/companyDashboard.tsx or components/companydashboard.tsx
 import React from "react";
-import CompanyForm from "../../components/companyform.tsx";
-import TrackerInput from "../../components/trackerinput.tsx";
-import BatchTable from "../../components/batchable.tsx";
+import CompanyForm from "../../components/forms/CompanyForm";
+import TrackerInput from "../../components/forms/TrackerInput";
+import BatchTable from "../../components/batchable";
 
 
 function CompanyDashboard() {

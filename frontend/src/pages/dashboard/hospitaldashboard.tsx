@@ -1,5 +1,5 @@
 import React from "react";
-import HospitalForm from "../../components/hospitalform";
+import HospitalForm from "../../components/forms/HospitalForm";
 import VerifyBatch from "../../components/verifybatch";
 
 function HospitalDashboard() {

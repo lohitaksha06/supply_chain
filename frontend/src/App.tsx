@@ -4,8 +4,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Layout
-import { Navbar } from './components/Navbar'; // Corrected Path
-import Footer from './components/Footer'; // Corrected Path
+import { Navbar } from './components/Navbar';
+import Footer from './components/Footer';
 
 // Auth Pages (Paths are case-sensitive, check your filenames)
 import Login from './pages/auth/login';

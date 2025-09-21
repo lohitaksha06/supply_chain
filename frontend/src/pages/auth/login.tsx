@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import "./login.css";
+import type { CSSProperties } from 'react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -41,82 +41,49 @@ const Login = () => {
     }
   };
 
+  const styles: { [k: string]: CSSProperties } = {
+    page: { display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: '100vh' },
+    left: { background: '#0ea5e9', color: '#fff', display: 'grid', placeItems: 'center', padding: 24 },
+    right: { display: 'grid', placeItems: 'center', padding: 24 },
+    card: { width: 380, border: '1px solid #e2e8f0', borderRadius: 8, padding: 16 },
+    input: { width: '100%', border: '1px solid #cbd5e1', borderRadius: 6, padding: 8, marginTop: 4 },
+    label: { fontSize: 12, color: '#64748b' },
+    actions: { display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' },
+    button: { background: '#0ea5e9', color: '#fff', border: 0, padding: '8px 12px', borderRadius: 6, cursor: 'pointer' },
+    link: { background: 'transparent', color: '#0ea5e9', border: 0, padding: 0, cursor: 'pointer' },
+    error: { color: '#ef4444', marginBottom: 8 },
+  };
   return (
-    <div className="login-container">
-      <div className="login-left-panel">
-        <div className="login-branding">
+    <div style={styles.page}>
+      <div style={styles.left}>
+        <div>
           <h1>Pharma<span>Chain</span></h1>
           <p>Secure access to medicine records and track your medicine location</p>
         </div>
-        <div className="login-illustration">
-          {/* Optional image/illustration */}
-        </div>
       </div>
-      
-      <div className="login-form-container">
-        <div className="login-form-wrapper">
+      <div style={styles.right}>
+        <div style={styles.card}>
           <h2>Welcome Back</h2>
-          <p className="login-subtitle">Sign in to your account</p>
-
-          {error && <div className="error-message">{error}</div>}
-
-          <form className="login-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="email">Email Address</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="doctor@medicalcenter.com"
-                className="form-input"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
+          <p>Sign in to your account</p>
+          {error && <div style={styles.error}>{error}</div>}
+          <form onSubmit={handleSubmit}>
+            <div>
+              <label style={styles.label} htmlFor="email">Email Address</label>
+              <input style={styles.input} type="email" id="email" name="email" placeholder="doctor@medicalcenter.com" value={formData.email} onChange={handleChange} required />
             </div>
-            
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="Enter your password"
-                className="form-input"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-              <div className="forgot-password">
-                <a href="#">Forgot password?</a>
-              </div>
+            <div>
+              <label style={styles.label} htmlFor="password">Password</label>
+              <input style={styles.input} type="password" id="password" name="password" placeholder="Enter your password" value={formData.password} onChange={handleChange} required />
             </div>
-            
-            <button type="submit" className="login-button">
-              Sign In
-            </button>
-            
-            <div className="login-divider">
-              <span>or</span>
+            <div style={styles.actions}>
+              <button type="submit" style={styles.button}>Sign In</button>
+              <button type="button" style={styles.link}>Forgot password?</button>
             </div>
-            
-            <button type="button" className="sso-button">
-              Sign in with Google
-            </button>
           </form>
-          
-          <div className="login-footer">
-            Don't have an account?{" "}
-            <button className="register-button" onClick={() => navigate("/signup")}>
-              Register here
-            </button>
+          <div style={{ marginTop: 8 }}>
+            Don't have an account?{' '}
+            <button style={styles.link} onClick={() => navigate('/signup')}>Register here</button>
           </div>
-        </div>
-        
-        <div className="login-footer-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Use</a>
-          <a href="#">Help Center</a>
         </div>
       </div>
     </div>
