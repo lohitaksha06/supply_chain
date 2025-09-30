@@ -1,6 +1,7 @@
 export interface User {
   id: string
   username: string
+  name: string
   email: string
   role: 'company' | 'hospital' | 'customer'
 }
@@ -28,15 +29,18 @@ export interface ApiResponse {
 }
 
 export interface Batch {
+  id: string
   batch_id: string
   medicine_name: string
   source: string
   destination: string
   timestamp: string
+  expiry_date: string
   hash: string
   previous_hash: string
   signature?: string
   public_key?: string
+  status: 'active' | 'expired' | 'delivered'
 }
 
 export interface TrackerResponse {
