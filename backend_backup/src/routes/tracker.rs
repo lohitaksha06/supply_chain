@@ -38,6 +38,11 @@ pub struct VerifyResponse {
     pub message: String,
 }
 
+#[derive(Deserialize)]
+pub struct VerifyRequest {
+    pub batch_id: String,
+}
+
 #[derive(Serialize)]
 pub struct MerkleResponse {
     pub merkle_root: String,
@@ -167,6 +172,104 @@ async fn verify_batch(
     }
 }
 
+/// POST /verify
+/// Body: { batch_id }
+/// Mirrors verify_batch but accepts JSON and returns VerifyResponse
+async fn verify_batch_post(
+    State(pool): State<Arc<SqlitePool>>,
+    Json(payload): Json<VerifyRequest>,
+) -> Result<Json<VerifyResponse>, (StatusCode, String)> {
+    let row = sqlx::query(
+        "SELECT medicine_name, source, destination, timestamp, hash, previous_hash, signature, public_key
+         FROM medicine_batches WHERE batch_id = ?"
+    )
+    .bind(&payload.batch_id)
+    .fetch_optional(pool.as_ref())
+    .await
+    .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+
+    if let Some(batch) = row {
+        let medicine_name: String = batch.try_get("medicine_name").unwrap_or_default();
+        let source: String = batch.try_get("source").unwrap_or_default();
+        let destination: String = batch.try_get("destination").unwrap_or_default();
+        let timestamp: String = batch.try_get("timestamp").unwrap_or_default();
+        let previous_hash: String = batch.try_get("previous_hash").unwrap_or_default();
+        let hash: String = batch.try_get("hash").unwrap_or_default();
+
+        let recomputed_hash = compute_batch_hash(
+            &payload.batch_id,
+            &medicine_name,
+            &source,
+            &destination,
+            &timestamp,
+            &previous_hash,
+        );
+
+        let is_valid_hash = recomputed_hash == hash;
+
+        let is_signature_valid = if let (Some(sig_b64), Some(pubkey_b64)) = (batch.try_get::<Option<String>, _>("signature").ok().flatten(), batch.try_get::<Option<String>, _>("public_key").ok().flatten()) {
+            let sig_bytes = general_purpose::STANDARD.decode(sig_b64).unwrap_or_default();
+            let pubkey_der = general_purpose::STANDARD.decode(pubkey_b64).unwrap_or_default();
+            if let Ok(public_key) = RsaPublicKey::from_pkcs1_der(&pubkey_der) {
+                verify_signature(&public_key, recomputed_hash.as_bytes(), &sig_bytes)
+            } else {
+                false
+            }
+        } else {
+            false
+        };
+
+        let msg = if is_valid_hash && is_signature_valid {
+            "Hash + signature both valid"
+        } else if is_valid_hash {
+            "Hash valid, but signature failed"
+        } else {
+            "Hash mismatch — possible tampering!"
+        };
+
+        Ok(Json(VerifyResponse { valid: is_valid_hash && is_signature_valid, message: msg.to_string() }))
+    } else {
+        Err((StatusCode::NOT_FOUND, "Batch not found".to_string()))
+    }
+}
+
+#[derive(Deserialize)]
+pub struct TrackRequest { pub batch_id: String }
+
+/// POST /track
+/// Body: { batch_id }
+/// Returns chain/crypto details for a batch so the frontend can display them
+async fn track_batch_post(
+    State(pool): State<Arc<SqlitePool>>,
+    Json(payload): Json<TrackRequest>,
+) -> Result<Json<TrackerResponse>, (StatusCode, String)> {
+    let row = sqlx::query(
+        "SELECT hash, previous_hash, signature, public_key
+         FROM medicine_batches WHERE batch_id = ?"
+    )
+    .bind(&payload.batch_id)
+    .fetch_optional(pool.as_ref())
+    .await
+    .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+
+    if let Some(batch) = row {
+        let batch_hash: String = batch.try_get("hash").unwrap_or_default();
+        let previous_hash: String = batch.try_get("previous_hash").unwrap_or_default();
+        let signature: String = batch.try_get("signature").unwrap_or_default();
+        let public_key: String = batch.try_get("public_key").unwrap_or_default();
+
+        Ok(Json(TrackerResponse {
+            message: format!("Tracking info for batch {}", payload.batch_id),
+            batch_hash,
+            previous_hash,
+            signature,
+            public_key,
+        }))
+    } else {
+        Err((StatusCode::NOT_FOUND, "Batch not found".to_string()))
+    }
+}
+
 /// GET /api/tracker/verifychain
 /// Verifies full hash chain integrity
 async fn verify_chain(
@@ -240,5 +343,8 @@ pub fn tracker_routes(pool: Arc<SqlitePool>) -> Router {
         .route("/api/tracker/verify/:batch_id", get(verify_batch))
         .route("/api/tracker/verifychain", get(verify_chain))
         .route("/api/tracker/merkleroot", get(get_merkle_root))
+        // Compatibility routes expected by frontend
+        .route("/verify", post(verify_batch_post))
+        .route("/track", post(track_batch_post))
         .with_state(pool)
 }
