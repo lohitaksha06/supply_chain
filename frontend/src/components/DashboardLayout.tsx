@@ -18,7 +18,8 @@ import {
   Hospital,
   ChevronLeft,
   HelpCircle,
-  History
+  History,
+  Search
 } from 'lucide-react'
 
 interface NavItem {
@@ -40,7 +41,6 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
-  // Close mobile sidebar on route change
   useEffect(() => {
     setSidebarOpen(false)
   }, [pathname])
@@ -48,17 +48,6 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
   const handleLogout = () => {
     logout()
     router.push('/')
-  }
-
-  const getRoleIcon = () => {
-    switch (user?.role) {
-      case 'company':
-        return <Building2 className="w-6 h-6" />
-      case 'hospital':
-        return <Hospital className="w-6 h-6" />
-      default:
-        return <User className="w-6 h-6" />
-    }
   }
 
   const getRoleColor = () => {
@@ -72,7 +61,6 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
     }
   }
 
-  // Navigation items based on role
   const getNavItems = (): NavItem[] => {
     if (user?.role === 'customer') {
       return [
@@ -107,7 +95,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
   const navItems = getNavItems()
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -121,55 +109,54 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
         className={`fixed top-0 left-0 z-50 h-full bg-white shadow-xl transition-all duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
           lg:translate-x-0
-          ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-72'}
+          ${sidebarCollapsed ? 'lg:w-24' : 'lg:w-80'}
         `}
       >
         <div className="flex flex-col h-full">
-          {/* Logo & Close/Collapse */}
-          <div className="flex items-center justify-between h-20 px-6 border-b border-gray-200">
+          {/* Logo */}
+          <div className="flex items-center justify-between h-24 px-6 border-b border-gray-200">
             {!sidebarCollapsed && (
-              <Link href="/" className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-xl ${getRoleColor()} flex items-center justify-center`}>
-                  <Pill className="w-6 h-6 text-white" />
+              <Link href="/" className="flex items-center gap-4">
+                <div className={`w-14 h-14 rounded-2xl ${getRoleColor()} flex items-center justify-center`}>
+                  <Pill className="w-7 h-7 text-white" />
                 </div>
-                <span className="text-xl font-bold text-gray-900">PharmaChain</span>
+                <span className="text-2xl font-bold text-gray-900">PharmaChain</span>
               </Link>
             )}
             {sidebarCollapsed && (
-              <div className={`w-12 h-12 rounded-xl ${getRoleColor()} flex items-center justify-center mx-auto`}>
-                <Pill className="w-6 h-6 text-white" />
+              <div className={`w-14 h-14 rounded-2xl ${getRoleColor()} flex items-center justify-center mx-auto`}>
+                <Pill className="w-7 h-7 text-white" />
               </div>
             )}
             
-            {/* Close button for mobile */}
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-3 rounded-xl hover:bg-gray-100 transition-colors"
+              className="lg:hidden p-4 rounded-xl hover:bg-gray-100 transition-colors"
             >
-              <X className="w-6 h-6 text-gray-600" />
+              <X className="w-7 h-7 text-gray-600" />
             </button>
           </div>
 
-          {/* Collapse toggle button - desktop only */}
+          {/* Collapse toggle */}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="hidden lg:flex absolute -right-4 top-24 w-8 h-8 bg-white border border-gray-200 rounded-full items-center justify-center shadow-md hover:bg-gray-50 transition-colors z-10"
+            className="hidden lg:flex absolute -right-5 top-28 w-10 h-10 bg-white border border-gray-200 rounded-full items-center justify-center shadow-lg hover:bg-gray-50 transition-colors z-10"
           >
-            <ChevronLeft className={`w-5 h-5 text-gray-600 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
+            <ChevronLeft className={`w-6 h-6 text-gray-600 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
           </button>
 
           {/* User Info */}
           {!sidebarCollapsed && (
-            <div className="px-6 py-6 border-b border-gray-200">
-              <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 rounded-xl ${getRoleColor()} flex items-center justify-center text-white`}>
-                  {getRoleIcon()}
+            <div className="px-6 py-8 border-b border-gray-200">
+              <div className="flex items-center gap-5">
+                <div className={`w-16 h-16 rounded-2xl ${getRoleColor()} flex items-center justify-center text-white`}>
+                  <User className="w-8 h-8" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 truncate text-lg">
+                  <p className="font-bold text-gray-900 truncate text-xl">
                     {user?.username || user?.name}
                   </p>
-                  <p className="text-sm text-gray-500 capitalize">
+                  <p className="text-base text-gray-500 capitalize mt-1">
                     {user?.role} Account
                   </p>
                 </div>
@@ -177,38 +164,40 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
             </div>
           )}
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center gap-4 px-4 py-4 rounded-xl font-semibold transition-all text-base
-                    ${sidebarCollapsed ? 'justify-center' : ''}
-                    ${isActive
-                      ? `${getRoleColor()} text-white shadow-lg`
-                      : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  title={sidebarCollapsed ? item.name : undefined}
-                >
-                  <item.icon className="w-6 h-6 flex-shrink-0" />
-                  {!sidebarCollapsed && <span>{item.name}</span>}
-                </Link>
-              )
-            })}
+          {/* Navigation - BIG BUTTONS WITH GAPS */}
+          <nav className="flex-1 px-5 py-8 overflow-y-auto">
+            <div className="space-y-4">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex items-center gap-5 px-6 py-5 rounded-2xl font-bold transition-all text-lg
+                      ${sidebarCollapsed ? 'justify-center px-4' : ''}
+                      ${isActive
+                        ? `${getRoleColor()} text-white shadow-lg`
+                        : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    title={sidebarCollapsed ? item.name : undefined}
+                  >
+                    <item.icon className="w-7 h-7 flex-shrink-0" />
+                    {!sidebarCollapsed && <span>{item.name}</span>}
+                  </Link>
+                )
+              })}
+            </div>
           </nav>
 
-          {/* Logout Button */}
-          <div className="p-4 border-t border-gray-200">
+          {/* Logout */}
+          <div className="p-5 border-t border-gray-200">
             <button
               onClick={handleLogout}
-              className={`flex items-center gap-4 w-full px-4 py-4 rounded-xl font-semibold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all text-base
-                ${sidebarCollapsed ? 'justify-center' : ''}`}
+              className={`flex items-center gap-5 w-full px-6 py-5 rounded-2xl font-bold text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all text-lg
+                ${sidebarCollapsed ? 'justify-center px-4' : ''}`}
               title={sidebarCollapsed ? 'Logout' : undefined}
             >
-              <LogOut className="w-6 h-6 flex-shrink-0" />
+              <LogOut className="w-7 h-7 flex-shrink-0" />
               {!sidebarCollapsed && <span>Logout</span>}
             </button>
           </div>
@@ -216,41 +205,53 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
       </aside>
 
       {/* Main Content */}
-      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'}`}>
-        {/* Top Header */}
+      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-24' : 'lg:ml-80'}`}>
+        {/* Top Header with Search */}
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between h-20 px-6 lg:px-10">
-            {/* Left: Menu button & Title */}
+          <div className="flex items-center justify-between h-24 px-8">
+            {/* Left: Menu & Title */}
             <div className="flex items-center gap-6">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-3 rounded-xl hover:bg-gray-100 transition-colors"
+                className="lg:hidden p-4 rounded-xl hover:bg-gray-100 transition-colors"
               >
-                <Menu className="w-7 h-7 text-gray-700" />
+                <Menu className="w-8 h-8 text-gray-700" />
               </button>
               <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{title}</h1>
+                <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
                 {subtitle && (
-                  <p className="text-base text-gray-500 mt-1">{subtitle}</p>
+                  <p className="text-lg text-gray-500 mt-1">{subtitle}</p>
                 )}
               </div>
             </div>
 
-            {/* Right: User Info */}
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-xl ${getRoleColor()} flex items-center justify-center text-white`}>
-                {getRoleIcon()}
+            {/* Center: Search Bar */}
+            <div className="hidden md:flex flex-1 max-w-xl mx-12">
+              <div className="relative w-full">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search batches, medicines..."
+                  className="w-full pl-14 pr-6 py-4 text-lg bg-gray-100 border-2 border-transparent rounded-2xl focus:bg-white focus:border-teal-500 transition-all outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Right: User */}
+            <div className="flex items-center gap-5">
+              <div className={`w-14 h-14 rounded-2xl ${getRoleColor()} flex items-center justify-center text-white`}>
+                <User className="w-7 h-7" />
               </div>
               <div className="hidden sm:block">
-                <p className="font-bold text-gray-900">{user?.username || user?.name}</p>
-                <p className="text-sm text-gray-500 capitalize">{user?.role}</p>
+                <p className="font-bold text-gray-900 text-lg">{user?.username || user?.name}</p>
+                <p className="text-base text-gray-500 capitalize">{user?.role}</p>
               </div>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="p-6 lg:p-10">
+        <main className="p-8 lg:p-12">
           {children}
         </main>
       </div>
