@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
-import { Eye, EyeOff, Mail, Lock, User, UserPlus, Building2, Hospital } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, User, Pill, Building2, Hospital } from 'lucide-react'
 import axios from 'axios'
 import { API_BASE_URL } from '@/lib/utils'
 
@@ -36,7 +36,6 @@ export default function SignupPage() {
     setIsLoading(true)
     setError('')
 
-    // Validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       setIsLoading(false)
@@ -44,20 +43,19 @@ export default function SignupPage() {
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long')
+      setError('Password must be at least 6 characters')
       setIsLoading(false)
       return
     }
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/signup`, {
+      await axios.post(`${API_BASE_URL}/api/signup`, {
         username: formData.username,
         email: formData.email,
         password: formData.password,
         role: formData.role
       })
 
-      // If signup successful, automatically log in
       const loginResponse = await axios.post(`${API_BASE_URL}/api/login`, {
         email: formData.email,
         password: formData.password
@@ -74,7 +72,6 @@ export default function SignupPage() {
           role: role as 'company' | 'hospital' | 'customer'
         })
 
-        // Redirect based on role
         const roleRoutes = {
           company: '/dashboard/company',
           hospital: '/dashboard/hospital',
@@ -91,168 +88,295 @@ export default function SignupPage() {
     }
   }
 
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'company':
-        return <Building2 className="w-5 h-5" />
-      case 'hospital':
-        return <Hospital className="w-5 h-5" />
-      default:
-        return <User className="w-5 h-5" />
-    }
-  }
+  const roles = [
+    { value: 'customer', label: 'Customer', icon: User, color: '#0891b2' },
+    { value: 'company', label: 'Company', icon: Building2, color: '#0d9488' },
+    { value: 'hospital', label: 'Hospital', icon: Hospital, color: '#059669' }
+  ]
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <div className="mx-auto h-12 w-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-            <UserPlus className="h-6 w-6 text-white" />
+    <div style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 50%, #99f6e4 100%)',
+      padding: '40px 20px'
+    }}>
+      <div style={{ 
+        width: '100%', 
+        maxWidth: '520px',
+        backgroundColor: 'white',
+        borderRadius: '24px',
+        padding: '50px 40px',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
+      }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <div style={{ 
+            width: '80px', 
+            height: '80px', 
+            background: 'linear-gradient(135deg, #14b8a6, #0d9488)', 
+            borderRadius: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 24px auto',
+            boxShadow: '0 10px 30px rgba(20, 184, 166, 0.3)'
+          }}>
+            <Pill style={{ width: '40px', height: '40px', color: 'white' }} />
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Join PharmaChain
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Create your account to access the pharmaceutical supply chain
+          <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px' }}>
+            Create Account
+          </h1>
+          <p style={{ fontSize: '16px', color: '#6b7280' }}>
+            Join PharmaChain today
           </p>
         </div>
 
         {/* Form */}
-        <form className="mt-8 space-y-6 bg-white p-8 rounded-xl shadow-lg" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div style={{ 
+              backgroundColor: '#fef2f2', 
+              border: '2px solid #fecaca', 
+              color: '#dc2626',
+              padding: '16px',
+              borderRadius: '12px',
+              marginBottom: '24px',
+              fontSize: '14px'
+            }}>
               {error}
             </div>
           )}
 
-          <div className="space-y-4">
-            {/* Role Selection */}
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-                Account Type
-              </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
+          {/* Role Selection */}
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '12px' }}>
+              I am a...
+            </label>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              {roles.map((role) => {
+                const Icon = role.icon
+                const isSelected = formData.role === role.value
+                return (
+                  <button
+                    key={role.value}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, role: role.value })}
+                    style={{
+                      flex: 1,
+                      padding: '16px 12px',
+                      borderRadius: '12px',
+                      border: isSelected ? `3px solid ${role.color}` : '3px solid #e5e7eb',
+                      backgroundColor: isSelected ? `${role.color}10` : 'white',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <Icon style={{ width: '28px', height: '28px', color: isSelected ? role.color : '#9ca3af' }} />
+                    <span style={{ fontSize: '14px', fontWeight: '600', color: isSelected ? role.color : '#6b7280' }}>
+                      {role.label}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Username */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+              Username
+            </label>
+            <div style={{ position: 'relative' }}>
+              <User style={{ 
+                position: 'absolute', 
+                left: '16px', 
+                top: '50%', 
+                transform: 'translateY(-50%)',
+                width: '20px', 
+                height: '20px', 
+                color: '#9ca3af' 
+              }} />
+              <input
+                type="text"
+                name="username"
+                required
+                value={formData.username}
                 onChange={handleInputChange}
-                className="block w-full px-3 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Choose a username"
+                style={{ 
+                  width: '100%',
+                  padding: '16px 16px 16px 50px',
+                  fontSize: '16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              />
+            </div>
+          </div>
+
+          {/* Email */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+              Email Address
+            </label>
+            <div style={{ position: 'relative' }}>
+              <Mail style={{ 
+                position: 'absolute', 
+                left: '16px', 
+                top: '50%', 
+                transform: 'translateY(-50%)',
+                width: '20px', 
+                height: '20px', 
+                color: '#9ca3af' 
+              }} />
+              <input
+                type="email"
+                name="email"
+                required
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="Enter your email"
+                style={{ 
+                  width: '100%',
+                  padding: '16px 16px 16px 50px',
+                  fontSize: '16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              />
+            </div>
+          </div>
+
+          {/* Password */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+              Password
+            </label>
+            <div style={{ position: 'relative' }}>
+              <Lock style={{ 
+                position: 'absolute', 
+                left: '16px', 
+                top: '50%', 
+                transform: 'translateY(-50%)',
+                width: '20px', 
+                height: '20px', 
+                color: '#9ca3af' 
+              }} />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                required
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Create a password"
+                style={{ 
+                  width: '100%',
+                  padding: '16px 50px 16px 50px',
+                  fontSize: '16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ 
+                  position: 'absolute', 
+                  right: '16px', 
+                  top: '50%', 
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '0'
+                }}
               >
-                <option value="customer">Customer</option>
-                <option value="company">Pharmaceutical Company</option>
-                <option value="hospital">Hospital/Healthcare</option>
-              </select>
+                {showPassword ? (
+                  <EyeOff style={{ width: '20px', height: '20px', color: '#9ca3af' }} />
+                ) : (
+                  <Eye style={{ width: '20px', height: '20px', color: '#9ca3af' }} />
+                )}
+              </button>
             </div>
+          </div>
 
-            {/* Username */}
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                Username
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  {getRoleIcon(formData.role)}
-                </div>
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  required
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your username"
-                />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your email"
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Confirm your password"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
+          {/* Confirm Password */}
+          <div style={{ marginBottom: '32px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+              Confirm Password
+            </label>
+            <div style={{ position: 'relative' }}>
+              <Lock style={{ 
+                position: 'absolute', 
+                left: '16px', 
+                top: '50%', 
+                transform: 'translateY(-50%)',
+                width: '20px', 
+                height: '20px', 
+                color: '#9ca3af' 
+              }} />
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                required
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                placeholder="Confirm your password"
+                style={{ 
+                  width: '100%',
+                  padding: '16px 50px 16px 50px',
+                  fontSize: '16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '12px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#14b8a6'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={{ 
+                  position: 'absolute', 
+                  right: '16px', 
+                  top: '50%', 
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '0'
+                }}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff style={{ width: '20px', height: '20px', color: '#9ca3af' }} />
+                ) : (
+                  <Eye style={{ width: '20px', height: '20px', color: '#9ca3af' }} />
+                )}
+              </button>
             </div>
           </div>
 
@@ -260,30 +384,30 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            style={{ 
+              width: '100%',
+              padding: '18px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: 'white',
+              backgroundColor: isLoading ? '#5eead4' : '#0d9488',
+              border: 'none',
+              borderRadius: '12px',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              transition: 'background-color 0.2s',
+              boxShadow: '0 10px 30px rgba(13, 148, 136, 0.3)'
+            }}
           >
-            {isLoading ? (
-              <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Creating account...
-              </div>
-            ) : (
-              'Create Account'
-            )}
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
 
-          {/* Footer */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link 
-                href="/auth/login" 
-                className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
-              >
-                Sign in here
-              </Link>
-            </p>
-          </div>
+          {/* Sign In Link */}
+          <p style={{ textAlign: 'center', marginTop: '24px', color: '#6b7280', fontSize: '16px' }}>
+            Already have an account?{' '}
+            <Link href="/auth/login" style={{ color: '#0d9488', fontWeight: '600', textDecoration: 'none' }}>
+              Sign in here
+            </Link>
+          </p>
         </form>
       </div>
     </div>
