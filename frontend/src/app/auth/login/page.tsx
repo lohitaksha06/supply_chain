@@ -39,6 +39,7 @@ export default function LoginPage() {
       login(token, {
         id: '',
         username: user,
+        name: user,
         email,
         role: role as 'company' | 'hospital' | 'customer'
       })

@@ -1,7 +1,7 @@
 export interface User {
   id: string
   username: string
-  name: string
+  name?: string
   email: string
   role: 'company' | 'hospital' | 'customer'
 }

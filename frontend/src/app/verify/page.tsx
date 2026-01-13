@@ -95,7 +95,7 @@ export default function VerifyPage() {
                 <>
                   <div className="flex items-center space-x-2 text-gray-700">
                     {getRoleIcon(user.role)}
-                    <span className="text-sm font-medium">{user.name}</span>
+                    <span className="text-sm font-medium">{user.username || user.name}</span>
                     <span className="text-xs text-gray-500 capitalize">({user.role})</span>
                   </div>
                   <Link

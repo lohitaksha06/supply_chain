@@ -92,7 +92,7 @@ export default function CustomerDashboard() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 text-gray-700">
                 <User className="w-4 h-4" />
-                <span className="text-sm font-medium">{user.name}</span>
+                <span className="text-sm font-medium">{user.username || user.name}</span>
                 <span className="text-xs text-gray-500">(Customer)</span>
               </div>
               <Link

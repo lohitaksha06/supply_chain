@@ -30,21 +30,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser({
           id: userData.id || '',
           username: userData.username || userData,
+          name: userData.name || userData.username || userData,
           email: userData.email || '',
           role: storedRole as 'company' | 'hospital' | 'customer'
         })
-      } catch (error) {
-        // Clear invalid data
-        localStorage.clear()
+      } catch {
+        // If parsing fails, treat storedUser as a plain string username
+        setToken(storedToken)
+        setUser({
+          id: '',
+          username: storedUser,
+          name: storedUser,
+          email: '',
+          role: storedRole as 'company' | 'hospital' | 'customer'
+        })
       }
     }
   }, [])
 
   const login = (newToken: string, userData: User) => {
     setToken(newToken)
-    setUser(userData)
+    const userWithName = {
+      ...userData,
+      name: userData.name || userData.username
+    }
+    setUser(userWithName)
     localStorage.setItem('authToken', newToken)
-    localStorage.setItem('user', JSON.stringify(userData))
+    localStorage.setItem('user', JSON.stringify(userWithName))
     localStorage.setItem('role', userData.role)
   }
 

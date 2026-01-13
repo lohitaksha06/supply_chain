@@ -69,6 +69,7 @@ export default function SignupPage() {
         login(token, {
           id: '',
           username: user,
+          name: user,
           email: formData.email,
           role: role as 'company' | 'hospital' | 'customer'
         })
