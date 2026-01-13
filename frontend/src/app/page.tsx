@@ -5,26 +5,63 @@ import { Building2, Hospital, User, ArrowRight, Pill, Shield, Activity, Package 
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-50 to-white">
+    <div style={{ minHeight: '100vh', backgroundColor: '#f0fdfa' }}>
       {/* Header */}
-      <header className="w-full bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center">
-              <Pill className="w-6 h-6 text-white" />
+      <header style={{ 
+        width: '100%', 
+        backgroundColor: 'white', 
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        padding: '20px 0'
+      }}>
+        <div style={{ 
+          maxWidth: '1200px', 
+          margin: '0 auto', 
+          padding: '0 40px',
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center' 
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ 
+              width: '50px', 
+              height: '50px', 
+              background: 'linear-gradient(135deg, #14b8a6, #06b6d4)', 
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Pill style={{ width: '28px', height: '28px', color: 'white' }} />
             </div>
-            <span className="text-2xl font-bold text-teal-600">PharmaChain</span>
+            <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#0d9488' }}>PharmaChain</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div style={{ display: 'flex', gap: '20px' }}>
             <Link
               href="/auth/login"
-              className="px-8 py-4 text-lg font-bold text-teal-600 hover:text-teal-700 border-2 border-teal-600 rounded-xl hover:bg-teal-50 transition-all"
+              style={{ 
+                padding: '16px 40px', 
+                fontSize: '18px', 
+                fontWeight: 'bold', 
+                color: '#0d9488',
+                border: '3px solid #0d9488',
+                borderRadius: '12px',
+                textDecoration: 'none',
+                backgroundColor: 'white'
+              }}
             >
               Login
             </Link>
             <Link
               href="/auth/signup"
-              className="px-8 py-4 text-lg font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all shadow-lg"
+              style={{ 
+                padding: '16px 40px', 
+                fontSize: '18px', 
+                fontWeight: 'bold', 
+                color: 'white',
+                backgroundColor: '#0d9488',
+                borderRadius: '12px',
+                textDecoration: 'none'
+              }}
             >
               Sign Up
             </Link>
@@ -33,146 +70,298 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="w-full py-20 px-8">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-6xl font-bold text-gray-900 mb-6">
+      <section style={{ width: '100%', padding: '80px 40px', textAlign: 'center' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h1 style={{ fontSize: '64px', fontWeight: 'bold', color: '#1f2937', marginBottom: '20px' }}>
             Track Your Medicine
-            <span className="block text-teal-600 mt-2">With Blockchain</span>
+          </h1>
+          <h1 style={{ fontSize: '64px', fontWeight: 'bold', color: '#0d9488', marginBottom: '30px' }}>
+            With Blockchain
           </h1>
           
-          <p className="text-xl text-gray-600 mb-12 max-w-xl mx-auto">
+          <p style={{ fontSize: '24px', color: '#6b7280', marginBottom: '50px' }}>
             Verify medicine authenticity. Prevent counterfeits.
           </p>
           
-          <div className="flex gap-6 justify-center mb-16">
+          <div style={{ display: 'flex', gap: '30px', justifyContent: 'center', marginBottom: '60px' }}>
             <Link
               href="/auth/signup"
-              className="px-12 py-5 text-xl font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-2xl transition-all shadow-xl flex items-center gap-3"
+              style={{ 
+                padding: '24px 60px', 
+                fontSize: '22px', 
+                fontWeight: 'bold', 
+                color: 'white',
+                backgroundColor: '#0d9488',
+                borderRadius: '16px',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                boxShadow: '0 10px 30px rgba(13, 148, 136, 0.3)'
+              }}
             >
-              Get Started <ArrowRight className="w-6 h-6" />
+              Get Started <ArrowRight style={{ width: '28px', height: '28px' }} />
             </Link>
             <Link
               href="/track"
-              className="px-12 py-5 text-xl font-bold text-teal-600 bg-white border-3 border-teal-600 hover:bg-teal-50 rounded-2xl transition-all"
+              style={{ 
+                padding: '24px 60px', 
+                fontSize: '22px', 
+                fontWeight: 'bold', 
+                color: '#0d9488',
+                backgroundColor: 'white',
+                border: '3px solid #0d9488',
+                borderRadius: '16px',
+                textDecoration: 'none'
+              }}
             >
               Track Batch
             </Link>
           </div>
 
           {/* Visual Icons */}
-          <div className="flex justify-center gap-16 mt-8">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <Shield className="w-10 h-10 text-teal-600" />
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '80px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ 
+                width: '100px', 
+                height: '100px', 
+                backgroundColor: '#ccfbf1', 
+                borderRadius: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px auto'
+              }}>
+                <Shield style={{ width: '50px', height: '50px', color: '#0d9488' }} />
               </div>
-              <p className="font-bold text-gray-700">Secure</p>
+              <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#374151' }}>Secure</p>
             </div>
-            <div className="text-center">
-              <div className="w-20 h-20 bg-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <Activity className="w-10 h-10 text-cyan-600" />
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ 
+                width: '100px', 
+                height: '100px', 
+                backgroundColor: '#cffafe', 
+                borderRadius: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px auto'
+              }}>
+                <Activity style={{ width: '50px', height: '50px', color: '#0891b2' }} />
               </div>
-              <p className="font-bold text-gray-700">Real-time</p>
+              <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#374151' }}>Real-time</p>
             </div>
-            <div className="text-center">
-              <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <Package className="w-10 h-10 text-emerald-600" />
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ 
+                width: '100px', 
+                height: '100px', 
+                backgroundColor: '#d1fae5', 
+                borderRadius: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px auto'
+              }}>
+                <Package style={{ width: '50px', height: '50px', color: '#059669' }} />
               </div>
-              <p className="font-bold text-gray-700">Verified</p>
+              <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#374151' }}>Verified</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works - Simple */}
-      <section className="w-full py-16 px-8 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">
+      {/* How It Works */}
+      <section style={{ width: '100%', padding: '80px 40px', backgroundColor: 'white', textAlign: 'center' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937', marginBottom: '60px' }}>
             How It Works
           </h2>
           
-          <div className="flex justify-center items-center gap-8">
-            {/* Step 1 */}
-            <div className="text-center">
-              <div className="w-24 h-24 bg-teal-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
-                <span className="text-4xl font-bold text-white">1</span>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '40px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ 
+                width: '120px', 
+                height: '120px', 
+                backgroundColor: '#14b8a6', 
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px auto',
+                boxShadow: '0 10px 30px rgba(20, 184, 166, 0.4)'
+              }}>
+                <span style={{ fontSize: '48px', fontWeight: 'bold', color: 'white' }}>1</span>
               </div>
-              <p className="text-lg font-bold text-gray-800">Sign Up</p>
+              <p style={{ fontSize: '22px', fontWeight: 'bold', color: '#1f2937' }}>Sign Up</p>
             </div>
             
-            <ArrowRight className="w-10 h-10 text-gray-300" />
+            <ArrowRight style={{ width: '50px', height: '50px', color: '#d1d5db' }} />
             
-            {/* Step 2 */}
-            <div className="text-center">
-              <div className="w-24 h-24 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
-                <span className="text-4xl font-bold text-white">2</span>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ 
+                width: '120px', 
+                height: '120px', 
+                backgroundColor: '#06b6d4', 
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px auto',
+                boxShadow: '0 10px 30px rgba(6, 182, 212, 0.4)'
+              }}>
+                <span style={{ fontSize: '48px', fontWeight: 'bold', color: 'white' }}>2</span>
               </div>
-              <p className="text-lg font-bold text-gray-800">Add Batch</p>
+              <p style={{ fontSize: '22px', fontWeight: 'bold', color: '#1f2937' }}>Add Batch</p>
             </div>
             
-            <ArrowRight className="w-10 h-10 text-gray-300" />
+            <ArrowRight style={{ width: '50px', height: '50px', color: '#d1d5db' }} />
             
-            {/* Step 3 */}
-            <div className="text-center">
-              <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
-                <span className="text-4xl font-bold text-white">3</span>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ 
+                width: '120px', 
+                height: '120px', 
+                backgroundColor: '#10b981', 
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px auto',
+                boxShadow: '0 10px 30px rgba(16, 185, 129, 0.4)'
+              }}>
+                <span style={{ fontSize: '48px', fontWeight: 'bold', color: 'white' }}>3</span>
               </div>
-              <p className="text-lg font-bold text-gray-800">Track & Verify</p>
+              <p style={{ fontSize: '22px', fontWeight: 'bold', color: '#1f2937' }}>Track & Verify</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Choose Your Role */}
-      <section className="w-full py-20 px-8 bg-gradient-to-b from-white to-teal-50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-4">
+      <section style={{ width: '100%', padding: '80px 40px', backgroundColor: '#f0fdfa', textAlign: 'center' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937', marginBottom: '20px' }}>
             Choose Your Role
           </h2>
-          <p className="text-xl text-gray-600 text-center mb-12">
+          <p style={{ fontSize: '22px', color: '#6b7280', marginBottom: '60px' }}>
             Select how you want to use PharmaChain
           </p>
           
-          <div className="grid grid-cols-3 gap-8">
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '40px' }}>
             {/* Company Card */}
-            <div className="bg-white rounded-3xl p-8 text-center shadow-xl hover:shadow-2xl transition-all border-2 border-transparent hover:border-teal-500">
-              <div className="w-24 h-24 bg-teal-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <Building2 className="w-12 h-12 text-teal-600" />
+            <div style={{ 
+              backgroundColor: 'white', 
+              borderRadius: '24px', 
+              padding: '50px 40px',
+              width: '340px',
+              textAlign: 'center',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ 
+                width: '120px', 
+                height: '120px', 
+                backgroundColor: '#ccfbf1', 
+                borderRadius: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 30px auto'
+              }}>
+                <Building2 style={{ width: '60px', height: '60px', color: '#0d9488' }} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Company</h3>
-              <p className="text-gray-600 mb-6">Add & manage medicine batches</p>
+              <h3 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1f2937', marginBottom: '16px' }}>Company</h3>
+              <p style={{ fontSize: '18px', color: '#6b7280', marginBottom: '30px' }}>Add & manage medicine batches</p>
               <Link
                 href="/auth/signup"
-                className="block w-full py-4 text-lg font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all"
+                style={{ 
+                  display: 'block',
+                  padding: '20px', 
+                  fontSize: '18px', 
+                  fontWeight: 'bold', 
+                  color: 'white',
+                  backgroundColor: '#0d9488',
+                  borderRadius: '12px',
+                  textDecoration: 'none'
+                }}
               >
                 Join as Company
               </Link>
             </div>
 
             {/* Hospital Card */}
-            <div className="bg-white rounded-3xl p-8 text-center shadow-xl hover:shadow-2xl transition-all border-2 border-transparent hover:border-emerald-500">
-              <div className="w-24 h-24 bg-emerald-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <Hospital className="w-12 h-12 text-emerald-600" />
+            <div style={{ 
+              backgroundColor: 'white', 
+              borderRadius: '24px', 
+              padding: '50px 40px',
+              width: '340px',
+              textAlign: 'center',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ 
+                width: '120px', 
+                height: '120px', 
+                backgroundColor: '#d1fae5', 
+                borderRadius: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 30px auto'
+              }}>
+                <Hospital style={{ width: '60px', height: '60px', color: '#059669' }} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Hospital</h3>
-              <p className="text-gray-600 mb-6">Receive & verify medicines</p>
+              <h3 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1f2937', marginBottom: '16px' }}>Hospital</h3>
+              <p style={{ fontSize: '18px', color: '#6b7280', marginBottom: '30px' }}>Receive & verify medicines</p>
               <Link
                 href="/auth/signup"
-                className="block w-full py-4 text-lg font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all"
+                style={{ 
+                  display: 'block',
+                  padding: '20px', 
+                  fontSize: '18px', 
+                  fontWeight: 'bold', 
+                  color: 'white',
+                  backgroundColor: '#059669',
+                  borderRadius: '12px',
+                  textDecoration: 'none'
+                }}
               >
                 Join as Hospital
               </Link>
             </div>
 
             {/* Customer Card */}
-            <div className="bg-white rounded-3xl p-8 text-center shadow-xl hover:shadow-2xl transition-all border-2 border-transparent hover:border-cyan-500">
-              <div className="w-24 h-24 bg-cyan-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <User className="w-12 h-12 text-cyan-600" />
+            <div style={{ 
+              backgroundColor: 'white', 
+              borderRadius: '24px', 
+              padding: '50px 40px',
+              width: '340px',
+              textAlign: 'center',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ 
+                width: '120px', 
+                height: '120px', 
+                backgroundColor: '#cffafe', 
+                borderRadius: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 30px auto'
+              }}>
+                <User style={{ width: '60px', height: '60px', color: '#0891b2' }} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Customer</h3>
-              <p className="text-gray-600 mb-6">Track & verify your medicine</p>
+              <h3 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1f2937', marginBottom: '16px' }}>Customer</h3>
+              <p style={{ fontSize: '18px', color: '#6b7280', marginBottom: '30px' }}>Track & verify your medicine</p>
               <Link
                 href="/auth/signup"
-                className="block w-full py-4 text-lg font-bold text-white bg-cyan-600 hover:bg-cyan-700 rounded-xl transition-all"
+                style={{ 
+                  display: 'block',
+                  padding: '20px', 
+                  fontSize: '18px', 
+                  fontWeight: 'bold', 
+                  color: 'white',
+                  backgroundColor: '#0891b2',
+                  borderRadius: '12px',
+                  textDecoration: 'none'
+                }}
               >
                 Join as Customer
               </Link>
@@ -182,31 +371,41 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="w-full py-20 px-8 bg-teal-600">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">
+      <section style={{ width: '100%', padding: '80px 40px', backgroundColor: '#0d9488', textAlign: 'center' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '48px', fontWeight: 'bold', color: 'white', marginBottom: '20px' }}>
             Ready to Get Started?
           </h2>
-          <p className="text-xl text-teal-100 mb-10">
+          <p style={{ fontSize: '22px', color: '#99f6e4', marginBottom: '40px' }}>
             Join thousands using PharmaChain today.
           </p>
           <Link
             href="/auth/signup"
-            className="inline-block px-16 py-6 text-2xl font-bold text-teal-600 bg-white hover:bg-teal-50 rounded-2xl transition-all shadow-xl"
+            style={{ 
+              display: 'inline-block',
+              padding: '24px 80px', 
+              fontSize: '24px', 
+              fontWeight: 'bold', 
+              color: '#0d9488',
+              backgroundColor: 'white',
+              borderRadius: '16px',
+              textDecoration: 'none',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+            }}
           >
             Create Free Account
           </Link>
         </div>
       </section>
 
-      {/* Simple Footer */}
-      <footer className="w-full py-8 px-8 bg-gray-900">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Pill className="w-6 h-6 text-teal-400" />
-            <span className="text-xl font-bold text-white">PharmaChain</span>
+      {/* Footer */}
+      <footer style={{ width: '100%', padding: '30px 40px', backgroundColor: '#1f2937', textAlign: 'center' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Pill style={{ width: '28px', height: '28px', color: '#14b8a6' }} />
+            <span style={{ fontSize: '22px', fontWeight: 'bold', color: 'white' }}>PharmaChain</span>
           </div>
-          <p className="text-gray-400">© 2026 PharmaChain. All rights reserved.</p>
+          <p style={{ color: '#9ca3af' }}>© 2026 PharmaChain. All rights reserved.</p>
         </div>
       </footer>
     </div>
