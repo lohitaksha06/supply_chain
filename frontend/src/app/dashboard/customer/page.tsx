@@ -92,20 +92,20 @@ export default function CustomerDashboard() {
   return (
     <DashboardLayout title="Customer Dashboard" subtitle="Verify and track your medicines">
       {/* Full Width Centered Container */}
-      <div className="max-w-6xl mx-auto">
+      <div className="w-full flex flex-col items-center">
         
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold text-gray-900 mb-6">
+        <div className="text-center mb-20 max-w-4xl">
+          <h2 className="text-5xl font-bold text-gray-900 mb-8">
             Ensure Your Medicine is Authentic
           </h2>
-          <p className="text-2xl text-gray-500 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-2xl text-gray-500 leading-relaxed">
             Use our blockchain-powered verification system to check if your medicine is genuine and track its journey from manufacturer to you.
           </p>
         </div>
 
         {/* Tab Buttons - BIG AND CENTERED WITH GAP */}
-        <div className="flex justify-center gap-10 mb-16">
+        <div className="flex justify-center gap-12 mb-20">
           <button
             onClick={() => { setActiveTab('verify'); setError(''); setVerificationResult(null); setTrackingResult(null); }}
             className={`flex items-center justify-center gap-5 py-8 px-16 rounded-3xl text-2xl font-bold transition-all duration-300
@@ -129,7 +129,7 @@ export default function CustomerDashboard() {
         </div>
 
         {/* Main Content Card - CENTERED */}
-        <div className="bg-white rounded-[2rem] shadow-2xl p-14 mb-16 max-w-4xl mx-auto border border-gray-100">
+        <div className="bg-white rounded-[2rem] shadow-2xl p-14 mb-20 w-full max-w-4xl border border-gray-100">
           {/* Card Header */}
           <div className="text-center mb-12">
             <div className={`inline-flex items-center justify-center w-28 h-28 rounded-full mb-6 ${activeTab === 'verify' ? 'bg-teal-100' : 'bg-blue-100'}`}>
@@ -185,7 +185,7 @@ export default function CustomerDashboard() {
 
         {/* Error Message */}
         {error && (
-          <div className="max-w-4xl mx-auto bg-red-50 border-2 border-red-200 rounded-2xl p-10 mb-16">
+          <div className="w-full max-w-4xl bg-red-50 border-2 border-red-200 rounded-2xl p-10 mb-20">
             <div className="flex items-center justify-center gap-6">
               <div className="w-20 h-20 rounded-2xl bg-red-500 flex items-center justify-center flex-shrink-0">
                 <XCircle className="w-10 h-10 text-white" />
@@ -200,7 +200,7 @@ export default function CustomerDashboard() {
 
         {/* Verification Result */}
         {verificationResult && (
-          <div className={`max-w-4xl mx-auto rounded-2xl p-10 mb-16 border-2 ${
+          <div className={`w-full max-w-4xl rounded-2xl p-10 mb-20 border-2 ${
             verificationResult.valid
               ? 'bg-green-50 border-green-200'
               : 'bg-red-50 border-red-200'
@@ -238,7 +238,7 @@ export default function CustomerDashboard() {
 
         {/* Tracking Result */}
         {trackingResult && (
-          <div className="max-w-4xl mx-auto bg-blue-50 border-2 border-blue-200 rounded-2xl p-10 mb-16">
+          <div className="w-full max-w-4xl bg-blue-50 border-2 border-blue-200 rounded-2xl p-10 mb-20">
             <div className="flex flex-col items-center text-center gap-6">
               <div className="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center">
                 <Truck className="w-14 h-14 text-white" />
@@ -262,7 +262,7 @@ export default function CustomerDashboard() {
         )}
 
         {/* Supply Chain Steps - INFO CARDS */}
-        <div className="grid md:grid-cols-3 gap-10 mb-16">
+        <div className="grid md:grid-cols-3 gap-12 mb-20 w-full max-w-5xl">
           <div className="bg-white rounded-2xl p-10 text-center shadow-xl hover:shadow-2xl transition-all border border-gray-100">
             <div className="inline-flex items-center justify-center w-24 h-24 bg-blue-100 rounded-full mb-6">
               <Building2 className="w-12 h-12 text-blue-600" />
@@ -287,7 +287,7 @@ export default function CustomerDashboard() {
         </div>
 
         {/* Safety Notice */}
-        <div className="max-w-4xl mx-auto bg-amber-50 border-2 border-amber-200 rounded-2xl p-10 flex items-center gap-8">
+        <div className="w-full max-w-4xl bg-amber-50 border-2 border-amber-200 rounded-2xl p-10 flex items-center gap-8">
           <div className="flex-shrink-0">
             <div className="w-20 h-20 rounded-full bg-amber-500 flex items-center justify-center">
               <AlertTriangle className="w-10 h-10 text-white" />

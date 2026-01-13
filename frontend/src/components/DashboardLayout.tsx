@@ -68,7 +68,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
         { name: 'Verify Medicine', href: '/verify', icon: Shield },
         { name: 'Track Batch', href: '/track', icon: Activity },
         { name: 'History', href: '/history', icon: History },
-        { name: 'Help', href: '/help', icon: HelpCircle },
+        { name: 'Settings', href: '/dashboard/customer/settings', icon: HelpCircle },
       ]
     }
 
